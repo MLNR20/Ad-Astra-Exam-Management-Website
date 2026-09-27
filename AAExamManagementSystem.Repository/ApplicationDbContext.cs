@@ -26,6 +26,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     {
         base.OnModelCreating(builder);
 
+        builder.HasDefaultSchema("AAExam");
+
         builder.Entity<ApplicationUser>()
             .HasOne(u => u.Department)
             .WithMany(d => d.Users)
