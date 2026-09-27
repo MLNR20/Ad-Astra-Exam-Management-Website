@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AAExamManagementSystem.ViewComponents;
 
-public record EntityTableRow(string Id, string Name, bool? IsActive = null, DateTime? DateCreated = null);
+public record EntityTableRow(string Id, string Name, bool? IsActive = null, DateTime? DateCreated = null, string? Roles = null);
 
 public record EntityTableViewModel(
     string TableId,
@@ -22,7 +22,8 @@ public record EntityTableViewModel(
     string? EntityName,
     bool UseSoftDelete,
     string? SimulateButtonText = null,
-    string? SimulateBasePath = null);
+    string? SimulateBasePath = null,
+    bool ShowRolesColumn = false);
 
 public class EntityTableViewComponent : ViewComponent
 {
@@ -44,7 +45,8 @@ public class EntityTableViewComponent : ViewComponent
         string? entityName = null,
         bool useSoftDelete = false,
         string? simulateButtonText = null,
-        string? simulateBasePath = null)
+        string? simulateBasePath = null,
+        bool showRolesColumn = false)
     {
         var model = new EntityTableViewModel(
             tableId,
@@ -64,7 +66,8 @@ public class EntityTableViewComponent : ViewComponent
             entityName,
             useSoftDelete,
             simulateButtonText,
-            simulateBasePath);
+            simulateBasePath,
+            showRolesColumn);
 
         return View(model);
     }

@@ -9,8 +9,9 @@
     tableId = "usersTable",
     basePath = "/Users",
     emptyMessage = "No users found.",
-    items = Model.Users.Select(u => new EntityTableRow(u.Id, $"{u.FullName} ({u.Role})", u.IsActive)),
+    items = Model.Users.Select(u => new EntityTableRow(u.Id, u.FullName, u.IsActive, Roles: u.Role)),
     title = "Users",
+    showRolesColumn = true,
     showStatusColumn = true,
     confirmDeleteWithSweetAlert = true,
     entityName = "User"

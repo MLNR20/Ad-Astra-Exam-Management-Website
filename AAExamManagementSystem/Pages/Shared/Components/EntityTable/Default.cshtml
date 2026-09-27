@@ -9,9 +9,9 @@
             }
             @Model.Title
         </h5>
-        @if (!string.IsNullOrEmpty(Model.AddButtonText))
+        @if (!string.IsNullOrEmpty(Model.AddButtonText) || !string.IsNullOrEmpty(Model.SimulateBasePath))
         {
-            <div class="mt-4 d-flex align-items-center">
+            <div class="mt-4 d-flex align-items-center gap-2">
                 @if (!string.IsNullOrEmpty(Model.AddButtonModalTarget))
                 {
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="@Model.AddButtonModalTarget">@Model.AddButtonText</button>
@@ -19,6 +19,10 @@
                 else if (!string.IsNullOrEmpty(Model.AddButtonHref))
                 {
                     <a href="@Model.AddButtonHref" class="btn btn-primary">@Model.AddButtonText</a>
+                }
+                @if (!string.IsNullOrEmpty(Model.SimulateBasePath))
+                {
+                    <a href="@Model.SimulateBasePath" class="btn btn-outline-primary">@(Model.SimulateButtonText ?? "Simulate")</a>
                 }
             </div>
         }
@@ -34,6 +38,10 @@
                     <thead>
                         <tr>
                             <th class="text-start">Name</th>
+                            @if (Model.ShowRolesColumn)
+                            {
+                                <th class="text-start">Roles</th>
+                            }
                             @if (Model.ShowStatusColumn)
                             {
                                 <th class="text-start">Status</th>
@@ -50,6 +58,10 @@
                         {
                             <tr>
                                 <td class="text-start">@item.Name</td>
+                                @if (Model.ShowRolesColumn)
+                                {
+                                    <td class="text-start">@(string.IsNullOrEmpty(item.Roles) ? "-" : item.Roles)</td>
+                                }
                                 @if (Model.ShowStatusColumn)
                                 {
                                     <td class="text-start">@await Component.InvokeAsync("StatusPill", new { isActive = item.IsActive ?? false })</td>
@@ -61,10 +73,6 @@
                                 <td class="text-start">
                                     <a href="@Model.BasePath/Details/@item.Id" class="btn btn-secondary">Details</a>
                                     <a href="@Model.BasePath/Edit/@item.Id" class="btn btn-primary">Edit</a>
-                                    @if (!string.IsNullOrEmpty(Model.SimulateBasePath))
-                                    {
-                                        <a href="@Model.SimulateBasePath/@item.Id" class="btn btn-outline-primary">@(Model.SimulateButtonText ?? "Simulate")</a>
-                                    }
                                     @if (Model.UseSoftDelete)
                                     {
                                         var isActive = item.IsActive ?? true;
