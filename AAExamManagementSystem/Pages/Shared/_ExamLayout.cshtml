@@ -13,15 +13,17 @@
     <link rel="stylesheet" href="~/AAExamManagementSystem.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="bg-light">
+<body class="bg-light d-flex flex-column min-vh-100">
     <nav class="navbar navbar-light bg-white border-bottom mb-0">
         <div class="container-fluid">
             <span class="navbar-brand mb-0 fw-semibold"><i class="bi bi-eye" aria-hidden="true"></i>Exam Simulation Preview</span>
         </div>
     </nav>
-    <main role="main" class="min-vh-100">
+    <main role="main" class="flex-grow-1">
         @RenderBody()
     </main>
+
+    @await Html.PartialAsync("_AdAstraFooter")
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

@@ -198,3 +198,72 @@ html {
 .analytics-table > :not(caption) > * > * {
   padding: .75rem;
 }
+
+/* Ad Astra branded footer */
+.adastra-footer {
+  background-color: #1c1c1c;
+  color: #e7e7e7;
+  padding: 2.5rem 0 1.25rem;
+  font-family: 'Manrope', sans-serif;
+}
+
+.adastra-footer-heading {
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: #fff;
+  margin-bottom: .75rem;
+}
+
+.adastra-footer-text {
+  color: #b8b8b8;
+  font-size: .9rem;
+  line-height: 1.7;
+}
+
+.adastra-footer-indent {
+  margin-left: 1.4rem;
+}
+
+.adastra-footer-logo {
+  width: 72px;
+  height: auto;
+  color: #e7e8e9;
+}
+
+.adastra-footer-social {
+  display: flex;
+  gap: .6rem;
+  justify-content: center;
+}
+
+@media (min-width: 992px) {
+  .adastra-footer-social {
+    justify-content: flex-end;
+  }
+}
+
+.adastra-footer-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  background-color: #3a3a3a;
+  color: #fff;
+  text-decoration: none;
+  transition: background-color .15s ease;
+}
+
+.adastra-footer-icon:hover {
+  background-color: #52514e;
+  color: #fff;
+}
+
+.adastra-footer-copyright {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #3a3a3a;
+  color: #9a9a9a;
+  font-size: .85rem;
+}
