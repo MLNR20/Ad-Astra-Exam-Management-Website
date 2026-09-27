@@ -15,6 +15,10 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/");
     options.Conventions.AllowAnonymousToPage("/Login");
     options.Conventions.AllowAnonymousToPage("/Signup");
+    options.Conventions.AllowAnonymousToPage("/ForgotPassword");
+    options.Conventions.AllowAnonymousToPage("/ForgotPasswordConfirmation");
+    options.Conventions.AllowAnonymousToPage("/ResetPassword");
+    options.Conventions.AllowAnonymousToPage("/ResetPasswordConfirmation");
 });
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
