@@ -1,3 +1,4 @@
+using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AAExamManagementSystem.Pages.AuditLogs;
 
-[Authorize(Roles = Roles.Admin)]
+[Authorize(Roles = AppRoles.Admin)]
 public class IndexModel : PageModel
 {
     private readonly ApplicationDbContext _db;
