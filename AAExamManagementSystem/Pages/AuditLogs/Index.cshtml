@@ -1,0 +1,73 @@
+@page
+@model AAExamManagementSystem.Pages.AuditLogs.IndexModel
+@{
+    ViewData["Title"] = "Audit Logs";
+}
+
+<div class="card border rounded-2 p-4">
+    <div class="card-header bg-white border-bottom-0">
+        <h5 class="mb-0 fw-semibold"><i class="bi bi-clipboard-data" aria-hidden="true"></i> Audit Logs</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.AuditLogs.Count == 0)
+        {
+            <span class="badge rounded-pill text-bg-primary fs-6 fw-semibold px-3 py-2">No audit logs found.</span>
+        }
+        else
+        {
+            <table id="auditLogsTable" class="table table-striped table-hover align-middle w-100">
+                <thead>
+                    <tr>
+                        <th class="text-start">Type</th>
+                        <th class="text-start">Response Body</th>
+                        <th class="text-start">Status</th>
+                        <th class="text-start">Created By</th>
+                        <th class="text-start">Date Created</th>
+                        <th class="text-start">Date Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model.AuditLogs)
+                    {
+                        <tr>
+                            <td class="text-start">@log.Type</td>
+                            <td class="text-start">
+                                <pre class="mb-0 audit-response-body">@log.ResponseBody</pre>
+                            </td>
+                            <td class="text-start">@await Component.InvokeAsync("StatusPill", new { isActive = log.IsActive })</td>
+                            <td class="text-start">@(string.IsNullOrWhiteSpace(log.CreatedByName) ? "-" : log.CreatedByName)</td>
+                            <td class="text-start">@log.DateCreated.ToString("MMM d, yyyy h:mm tt")</td>
+                            <td class="text-start">@log.DateUpdated.ToString("MMM d, yyyy h:mm tt")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
+    <style>
+        .audit-response-body {
+            max-width: 420px;
+            max-height: 120px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 0;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(function () {
+            if ($('#auditLogsTable').length) {
+                initEntityTable('auditLogsTable', { order: [] });
+            }
+        });
+    </script>
+}

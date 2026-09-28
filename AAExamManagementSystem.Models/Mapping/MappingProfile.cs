@@ -33,6 +33,10 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsActive, opt => opt.Ignore())
             .ForMember(dest => dest.SectionName, opt => opt.Ignore());
 
+        CreateMap<AuditLog, AuditLogDto>()
+            .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src =>
+                src.CreatedBy == null ? null : $"{src.CreatedBy.FirstName} {src.CreatedBy.LastName}".Trim()));
+
         CreateMap<Applicant, ApplicantDto>();
         CreateMap<ApplicantRegisterDto, Applicant>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())

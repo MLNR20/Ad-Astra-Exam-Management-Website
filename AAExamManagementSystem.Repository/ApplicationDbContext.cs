@@ -21,6 +21,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<Applicant> Applicants => Set<Applicant>();
     public DbSet<Answer> Answers => Set<Answer>();
     public DbSet<Attempt> Attempts => Set<Attempt>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -103,5 +104,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         builder.Entity<Applicant>()
             .HasIndex(a => a.UserId)
             .IsUnique();
+
+        builder.Entity<AuditLog>()
+            .HasOne(a => a.CreatedBy)
+            .WithMany()
+            .HasForeignKey(a => a.CreatedById)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

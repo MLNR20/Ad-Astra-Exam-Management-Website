@@ -49,6 +49,12 @@
                 <li class="nav-item">
                     <a asp-area="" asp-page="/Roles/Index" class="nav-link text-dark sidebar-link"><i class="bi bi-person-badge" aria-hidden="true"></i> Roles</a>
                 </li>
+                @if (User.IsInRole(Roles.Admin))
+                {
+                    <li class="nav-item">
+                        <a asp-area="" asp-page="/AuditLogs/Index" class="nav-link text-dark sidebar-link"><i class="bi bi-clipboard-data" aria-hidden="true"></i> Audit Logs</a>
+                    </li>
+                }
             </ul>
         }
 
