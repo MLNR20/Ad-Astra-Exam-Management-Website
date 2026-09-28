@@ -1,6 +1,7 @@
 using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace AAExamManagementSystem.Data;
 
@@ -73,6 +74,8 @@ public static class IdentitySeeder
 
         await SeedDemoUsersAsync(userManager, sections);
         await SeedWebDevelopmentQuestionsAsync(dbContext);
+        await SeedProgrammingLanguageIdentificationQuestionsAsync(dbContext);
+        await SeedProgrammingLanguageIconQuestionsAsync(dbContext);
     }
 
     private static readonly (string QuestionTitle, string[] Choices, int CorrectIndex)[] WebDevelopmentQuestions =
@@ -150,6 +153,149 @@ public static class IdentitySeeder
 
         await dbContext.SaveChangesAsync();
     }
+
+    private static readonly string[] ProgrammingLanguageIdentificationQuestions =
+    {
+        "Identify the programming language of the following snippet:\n\ndef greet(name):\n    print(f\"Hello, {name}!\")",
+        "Identify the programming language of the following snippet:\n\nconst greet = (name) => console.log(`Hello, ${name}!`);",
+        "Identify the programming language of the following snippet:\n\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello\");\n    }\n}",
+        "Identify the programming language of the following snippet:\n\npublic class Program {\n    static void Main() {\n        Console.WriteLine(\"Hello\");\n    }\n}",
+        "Identify the programming language of the following snippet:\n\n#include <stdio.h>\nint main() {\n    printf(\"Hello\\n\");\n    return 0;\n}",
+        "Identify the programming language of the following snippet:\n\n#include <iostream>\nint main() {\n    std::cout << \"Hello\" << std::endl;\n}",
+        "Identify the programming language of the following snippet:\n\ndef greet(name)\n  puts \"Hello, #{name}!\"\nend",
+        "Identify the programming language of the following snippet:\n\n<?php\nfunction greet($name) {\n    echo \"Hello, $name!\";\n}\n?>",
+        "Identify the programming language of the following snippet:\n\npackage main\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello\")\n}",
+        "Identify the programming language of the following snippet:\n\nSELECT FirstName, LastName FROM Users WHERE IsActive = 1;"
+    };
+
+    private static async Task SeedProgrammingLanguageIdentificationQuestionsAsync(ApplicationDbContext dbContext)
+    {
+        var section = dbContext.Sections.FirstOrDefault(s => s.Name == Departments.WebDevelopment);
+        if (section is null)
+        {
+            return;
+        }
+
+        var textBasedType = dbContext.QuestionTypes.FirstOrDefault(qt => qt.Name == QuestionTypes.TextBased);
+        if (textBasedType is null)
+        {
+            return;
+        }
+
+        Console.WriteLine("Seeding programming language identification questions:");
+
+        foreach (var questionTitle in ProgrammingLanguageIdentificationQuestions)
+        {
+            var exists = dbContext.Questions.Any(q => q.QuestionTitle == questionTitle && q.SectionId == section.Id);
+            if (exists)
+            {
+                Console.WriteLine($"  - (already seeded) {questionTitle.Split('\n')[0]}");
+                continue;
+            }
+
+            dbContext.Questions.Add(new Question
+            {
+                QuestionTypeId = textBasedType.Id,
+                SectionId = section.Id,
+                QuestionTitle = questionTitle,
+                Score = 1
+            });
+
+            Console.WriteLine($"  - {questionTitle.Split('\n')[0]}");
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    private const string ProgrammingLanguageIconQuestionTitle = "Identify the programming language shown in the icon below:";
+
+    private static readonly (string Icon, string Answer)[] ProgrammingLanguageIconQuestions =
+    {
+        ("https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg", "Python"),
+        ("https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg", "JavaScript"),
+        ("https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg", "Java"),
+        ("https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg", "C#"),
+        ("https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg", "C"),
+        ("https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg", "C++"),
+        ("https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg", "Ruby"),
+        ("https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg", "PHP"),
+        ("https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg", "Go"),
+        ("https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rust/rust-plain.svg", "Rust")
+    };
+
+    private static async Task SeedProgrammingLanguageIconQuestionsAsync(ApplicationDbContext dbContext)
+    {
+        var section = dbContext.Sections.FirstOrDefault(s => s.Name == Departments.WebDevelopment);
+        if (section is null)
+        {
+            return;
+        }
+
+        var identificationType = dbContext.QuestionTypes.FirstOrDefault(qt => qt.Name == QuestionTypes.Identification);
+        if (identificationType is null)
+        {
+            return;
+        }
+
+        Console.WriteLine("Seeding programming language icon questions:");
+
+        foreach (var (icon, answer) in ProgrammingLanguageIconQuestions)
+        {
+            var existing = await dbContext.Questions
+                .Include(q => q.QuestionAndChoices)
+                .ThenInclude(qc => qc.Choice)
+                .FirstOrDefaultAsync(q =>
+                    q.QuestionTitle == ProgrammingLanguageIconQuestionTitle && q.Image == icon && q.SectionId == section.Id);
+
+            if (existing is not null)
+            {
+                if (existing.QuestionTypeId != identificationType.Id || existing.QuestionAndChoices.Count != 1)
+                {
+                    existing.QuestionTypeId = identificationType.Id;
+                    dbContext.Choices.RemoveRange(existing.QuestionAndChoices.Select(qc => qc.Choice));
+                    dbContext.QuestionAndChoices.RemoveRange(existing.QuestionAndChoices);
+                    AddIdentificationAnswer(dbContext, existing, answer);
+                    Console.WriteLine($"  - (converted to identification) {answer}");
+                }
+                else
+                {
+                    Console.WriteLine($"  - (already seeded) {answer}");
+                }
+                continue;
+            }
+
+            var question = new Question
+            {
+                QuestionTypeId = identificationType.Id,
+                SectionId = section.Id,
+                QuestionTitle = ProgrammingLanguageIconQuestionTitle,
+                Image = icon,
+                Score = 1
+            };
+
+            dbContext.Questions.Add(question);
+            AddIdentificationAnswer(dbContext, question, answer);
+
+            Console.WriteLine($"  - {answer}");
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    // Stored once per question; the simulate page compares the applicant's typed answer against
+    // this choice's text using a case-insensitive comparison rather than an exact match.
+    private static void AddIdentificationAnswer(ApplicationDbContext dbContext, Question question, string correctAnswer)
+    {
+        var choice = new Choice
+        {
+            ChoiceText = correctAnswer,
+            IsCorrect = true
+        };
+
+        dbContext.Choices.Add(choice);
+        dbContext.QuestionAndChoices.Add(new QuestionAndChoice { Question = question, Choice = choice });
+    }
+
 
     private const string DemoPassword = "P@ssword2026!";
 
