@@ -1,4 +1,13 @@
-﻿<!DOCTYPE html>
+﻿@using AAExamManagementSystem.Models.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var currentUserName = currentUser is not null
+        ? $"{currentUser.FirstName} {currentUser.LastName}".Trim()
+        : User.Identity?.Name;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -27,6 +36,13 @@
                         </button>
                         <div class="d-flex align-items-center gap-3">
                             <span id="currentTime" class="text-muted fw-semibold"></span>
+                            @if (!string.IsNullOrWhiteSpace(currentUserName))
+                            {
+                                <span class="fw-semibold d-flex align-items-center gap-2">
+                                    <i class="bi bi-person-circle" aria-hidden="true"></i>
+                                    @currentUserName
+                                </span>
+                            }
                             <button type="button" class="btn btn-outline-secondary position-relative" aria-label="Notifications">
                                 <i class="bi bi-bell" aria-hidden="true"></i>
                                 <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
