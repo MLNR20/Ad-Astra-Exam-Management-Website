@@ -34,7 +34,16 @@
                             <td class="text-start">
                                 <pre class="mb-0 audit-response-body">@log.ResponseBody</pre>
                             </td>
-                            <td class="text-start">@await Component.InvokeAsync("StatusPill", new { isActive = log.IsActive })</td>
+                            <td class="text-start">
+                                @if (log.Type == "Login")
+                                {
+                                    @await Component.InvokeAsync("StatusPill", new { isActive = log.IsActive, activeText = "Success", inactiveText = "Failed" })
+                                }
+                                else
+                                {
+                                    @await Component.InvokeAsync("StatusPill", new { isActive = log.IsActive })
+                                }
+                            </td>
                             <td class="text-start">@(string.IsNullOrWhiteSpace(log.CreatedByName) ? "-" : log.CreatedByName)</td>
                             <td class="text-start">@log.DateCreated.ToString("MMM d, yyyy h:mm tt")</td>
                             <td class="text-start">@log.DateUpdated.ToString("MMM d, yyyy h:mm tt")</td>

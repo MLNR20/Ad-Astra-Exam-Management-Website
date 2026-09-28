@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using AAExamManagementSystem.Models.Entities;
+using AAExamManagementSystem.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,11 +11,13 @@ namespace AAExamManagementSystem.Pages
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _db;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+        public LoginModel(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ApplicationDbContext db)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _db = db;
         }
 
         [BindProperty]
@@ -43,6 +46,7 @@ namespace AAExamManagementSystem.Pages
 
             if (user is null)
             {
+                await LogLoginAttemptAsync(null, Input.UserName, success: false, "User not found.");
                 ModelState.AddModelError(string.Empty, "Invalid username/email or password.");
                 return Page();
             }
@@ -52,6 +56,8 @@ namespace AAExamManagementSystem.Pages
 
             if (result.Succeeded)
             {
+                await LogLoginAttemptAsync(user, Input.UserName, success: true, "Login succeeded.");
+
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 {
                     return LocalRedirect(returnUrl);
@@ -67,14 +73,32 @@ namespace AAExamManagementSystem.Pages
 
             if (result.IsLockedOut)
             {
+                await LogLoginAttemptAsync(user, Input.UserName, success: false, "Account locked out.");
                 ModelState.AddModelError(string.Empty, "This account has been locked out. Please try again later.");
             }
             else
             {
+                await LogLoginAttemptAsync(user, Input.UserName, success: false, "Invalid password.");
                 ModelState.AddModelError(string.Empty, "Invalid username/email or password.");
             }
 
             return Page();
+        }
+
+        private async Task LogLoginAttemptAsync(ApplicationUser? user, string attemptedUserName, bool success, string reason)
+        {
+            var auditLog = new AuditLog
+            {
+                Type = "Login",
+                ResponseBody = success
+                    ? $"Login succeeded for '{user!.UserName}'."
+                    : $"Login failed for '{attemptedUserName}': {reason}",
+                IsActive = success,
+                CreatedById = user?.Id,
+            };
+
+            _db.AuditLogs.Add(auditLog);
+            await _db.SaveChangesAsync();
         }
 
         public class LoginInput
