@@ -44,12 +44,25 @@
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <span id="currentTime" class="text-muted fw-semibold"></span>
-                            <form method="post" asp-area="" asp-page="/Logout">
-                                <button type="submit" class="btn btn-light rounded-circle d-flex align-items-center justify-content-center fw-semibold border-0 text-dark"
-                                        style="width: 38px; height: 38px;" aria-label="Logout" title="Logout">
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-light rounded-circle d-flex align-items-center justify-content-center fw-semibold border-0 text-dark"
+                                        style="width: 38px; height: 38px;" aria-label="Account" title="Account"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
                                     @userInitial
                                 </button>
-                            </form>
+                                <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 200px;">
+                                    @if (currentUser != null)
+                                    {
+                                        <span class="dropdown-item-text fw-semibold text-dark">@currentUser.FirstName @currentUser.LastName</span>
+                                        <hr class="dropdown-divider" />
+                                    }
+                                    <form method="post" asp-area="" asp-page="/Logout">
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-left" aria-hidden="true"></i> Logout
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                             <div class="dropdown">
                                 <button type="button" class="btn btn-light rounded-circle position-relative d-flex align-items-center justify-content-center border-0"
                                         style="width: 38px; height: 38px;" aria-label="Notifications"
