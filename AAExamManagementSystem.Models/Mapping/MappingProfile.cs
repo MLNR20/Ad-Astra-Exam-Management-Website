@@ -37,6 +37,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src =>
                 src.CreatedBy == null ? null : $"{src.CreatedBy.FirstName} {src.CreatedBy.LastName}".Trim()));
 
+        CreateMap<Notification, NotificationDto>();
+
         CreateMap<Applicant, ApplicantDto>();
         CreateMap<ApplicantRegisterDto, Applicant>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
