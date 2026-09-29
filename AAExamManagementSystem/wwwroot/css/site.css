@@ -34,12 +34,27 @@ html {
   text-align: start;
 }
 
+:root {
+  --app-header-height: 64px;
+}
+
 #sidebar.sidebar {
   width: 240px;
   min-width: 240px;
   min-height: 100vh;
   overflow: hidden;
   transition: width 0.2s ease, min-width 0.2s ease;
+}
+
+.sidebar-header {
+  height: var(--app-header-height);
+  flex-shrink: 0;
+}
+
+header .navbar {
+  min-height: var(--app-header-height);
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .main-content {
@@ -146,6 +161,25 @@ html {
 
 .table > :not(caption) > * > * {
   padding: 1.5rem;
+}
+
+.table thead th {
+  border-bottom: 2px solid #dee2e6;
+}
+
+.status-dot {
+  display: inline-block;
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+}
+
+.status-dot-active {
+  background-color: #198754;
+}
+
+.status-dot-inactive {
+  background-color: #6c757d;
 }
 
 .footer {
@@ -262,10 +296,6 @@ html {
   background: #f8f9fa;
   border-radius: .75rem;
   font-size: .875rem;
-}
-
-.analytics-table > :not(caption) > * > * {
-  padding: .75rem;
 }
 
 /* Ad Astra branded footer */

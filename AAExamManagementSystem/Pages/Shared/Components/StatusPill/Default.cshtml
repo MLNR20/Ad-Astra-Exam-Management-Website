@@ -1,10 +1,6 @@
 @model (bool isActive, string activeText, string inactiveText)
 
-@if (Model.isActive)
-{
-    <span class="badge rounded-pill text-bg-success fs-6 fw-semibold px-3 py-2">@Model.activeText</span>
-}
-else
-{
-    <span class="badge rounded-pill text-bg-secondary fs-6 fw-semibold px-3 py-2">@Model.inactiveText</span>
-}
+<span class="d-inline-flex align-items-center gap-2">
+    <span class="status-dot @(Model.isActive ? "status-dot-active" : "status-dot-inactive")" aria-hidden="true"></span>
+    @(Model.isActive ? Model.activeText : Model.inactiveText)
+</span>

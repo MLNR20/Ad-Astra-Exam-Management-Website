@@ -27,7 +27,16 @@ public class SimulateAllModel : PageModel
         _mapper = mapper;
     }
 
+    private const string SqlSchemaImagePrefix = "/images/sql-schema-";
+
+    [BindProperty(SupportsGet = true)]
+    public int PageNumber { get; set; } = 1;
+
     public IList<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
+
+    public bool HasNextPage { get; set; }
+
+    public bool HasPreviousPage { get; set; }
 
     public async Task<IActionResult> OnGetAsync()
     {
@@ -39,9 +48,17 @@ public class SimulateAllModel : PageModel
             .ToHashSet();
 
         var questions = await _repository.GetAllAsync();
-        Questions = _mapper.Map<IList<QuestionDto>>(questions
+        var allQuestions = _mapper.Map<IList<QuestionDto>>(questions
             .Where(q => q.IsActive && simulatedTypeIds.Contains(q.QuestionTypeId))
             .OrderBy(q => q.DateCreated));
+
+        var sqlQuestions = allQuestions.Where(q => q.Image != null && q.Image.StartsWith(SqlSchemaImagePrefix)).ToList();
+        var generalQuestions = allQuestions.Except(sqlQuestions).ToList();
+
+        var showSqlPage = PageNumber == 2 && sqlQuestions.Count > 0;
+        HasNextPage = PageNumber == 1 && sqlQuestions.Count > 0;
+        HasPreviousPage = showSqlPage;
+        Questions = showSqlPage ? sqlQuestions : generalQuestions;
 
         foreach (var question in Questions)
         {

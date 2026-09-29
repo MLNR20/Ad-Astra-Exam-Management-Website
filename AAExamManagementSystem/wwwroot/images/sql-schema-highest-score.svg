@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" font-family="Manrope, Arial, sans-serif">
+  <style>
+    .table-box { fill: #ffffff; stroke: #111827; stroke-width: 1.5; }
+    .table-header { fill: #2a78d6; }
+    .table-header-text { fill: #ffffff; font-weight: 700; font-size: 15px; }
+    .col-text { fill: #1f2937; font-size: 13px; }
+    .pk { font-weight: 700; }
+    .fk-line { stroke: #6c757d; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#6c757d" />
+    </marker>
+  </defs>
+
+  <!-- Staffers table -->
+  <g transform="translate(20,40)">
+    <rect class="table-box" width="200" height="150" rx="6" />
+    <rect class="table-header" width="200" height="32" rx="6" />
+    <rect class="table-header" x="0" y="16" width="200" height="16" />
+    <text class="table-header-text" x="12" y="22">Staffers</text>
+    <text class="col-text pk" x="12" y="54">Id (PK)</text>
+    <text class="col-text" x="12" y="76">Name</text>
+    <text class="col-text" x="12" y="98">DepartmentId</text>
+  </g>
+
+  <!-- Scores table -->
+  <g transform="translate(300,40)">
+    <rect class="table-box" width="200" height="150" rx="6" />
+    <rect class="table-header" width="200" height="32" rx="6" />
+    <rect class="table-header" x="0" y="16" width="200" height="16" />
+    <text class="table-header-text" x="12" y="22">Scores</text>
+    <text class="col-text pk" x="12" y="54">Id (PK)</text>
+    <text class="col-text" x="12" y="76">StafferId (FK)</text>
+    <text class="col-text" x="12" y="98">Score</text>
+  </g>
+
+  <!-- Subscriptions table -->
+  <g transform="translate(540,40)">
+    <rect class="table-box" width="200" height="150" rx="6" />
+    <rect class="table-header" width="200" height="32" rx="6" />
+    <rect class="table-header" x="0" y="16" width="200" height="16" />
+    <text class="table-header-text" x="12" y="22">Subscriptions</text>
+    <text class="col-text pk" x="12" y="54">Id (PK)</text>
+    <text class="col-text" x="12" y="76">StafferId (FK)</text>
+    <text class="col-text" x="12" y="98">PlanName</text>
+  </g>
+
+  <!-- Relationship: Staffers.Id -> Scores.StafferId (highlighted, used for this question) -->
+  <path class="fk-line" d="M220,105 C260,105 260,116 296,116" stroke="#eb6834" stroke-width="2.5" />
+
+  <text x="380" y="260" text-anchor="middle" font-size="13" fill="#52514e">One staffer can have many scores. Find the staffer with the highest score.</text>
+</svg>

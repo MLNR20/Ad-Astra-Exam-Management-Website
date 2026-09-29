@@ -76,6 +76,7 @@ public static class IdentitySeeder
         await SeedWebDevelopmentQuestionsAsync(dbContext);
         await SeedProgrammingLanguageIdentificationQuestionsAsync(dbContext);
         await SeedProgrammingLanguageIconQuestionsAsync(dbContext);
+        await SeedSqlQueryQuestionsAsync(dbContext);
     }
 
     private static readonly (string QuestionTitle, string[] Choices, int CorrectIndex)[] WebDevelopmentQuestions =
@@ -277,6 +278,54 @@ public static class IdentitySeeder
             AddIdentificationAnswer(dbContext, question, answer);
 
             Console.WriteLine($"  - {answer}");
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    private static readonly (string Image, string QuestionTitle, string Answer)[] SqlQueryQuestions =
+    {
+        ("/images/sql-schema-highest-score.svg",
+            "Given the schema below (Staffers, Scores, Subscriptions), write the SQL query to find the name of the staffer with the highest score.",
+            "SELECT s.Name FROM Staffers s JOIN Scores sc ON sc.StafferId = s.Id ORDER BY sc.Score DESC LIMIT 1;"),
+        ("/images/sql-schema-subscription-count.svg",
+            "Given the schema below (Staffers, Scores, Subscriptions), write the SQL query to find the total subscription count for each staffer.",
+            "SELECT s.Name, COUNT(*) AS TotalSubscriptions FROM Staffers s JOIN Subscriptions sub ON sub.StafferId = s.Id GROUP BY s.Name;")
+    };
+
+    private static async Task SeedSqlQueryQuestionsAsync(ApplicationDbContext dbContext)
+    {
+        var section = dbContext.Sections.FirstOrDefault(s => s.Name == Departments.WebDevelopment);
+        if (section is null)
+        {
+            return;
+        }
+
+        var identificationType = dbContext.QuestionTypes.FirstOrDefault(qt => qt.Name == QuestionTypes.Identification);
+        if (identificationType is null)
+        {
+            return;
+        }
+
+        foreach (var (image, questionTitle, answer) in SqlQueryQuestions)
+        {
+            var exists = dbContext.Questions.Any(q => q.QuestionTitle == questionTitle && q.SectionId == section.Id);
+            if (exists)
+            {
+                continue;
+            }
+
+            var question = new Question
+            {
+                QuestionTypeId = identificationType.Id,
+                SectionId = section.Id,
+                QuestionTitle = questionTitle,
+                Image = image,
+                Score = 1
+            };
+
+            dbContext.Questions.Add(question);
+            AddIdentificationAnswer(dbContext, question, answer);
         }
 
         await dbContext.SaveChangesAsync();

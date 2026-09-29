@@ -133,39 +133,50 @@
         }
         else
         {
-            <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0 analytics-table">
-                    <thead>
+            <table id="topScoresTable" class="table table-striped table-hover align-middle w-100">
+                <thead>
+                    <tr>
+                        <th class="text-start">#</th>
+                        <th class="text-start">Applicant</th>
+                        <th class="text-start">Student no.</th>
+                        <th class="text-start">First choice</th>
+                        <th class="text-start">Score</th>
+                        <th class="text-start">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model.TopAttempts.Count; i++)
+                    {
+                        var attempt = Model.TopAttempts[i];
                         <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Applicant</th>
-                            <th scope="col">Student no.</th>
-                            <th scope="col">First choice</th>
-                            <th scope="col" class="text-end">Score</th>
-                            <th scope="col" class="text-end">Date</th>
+                            <td class="text-start">@(i + 1)</td>
+                            <td class="text-start fw-semibold">@attempt.ApplicantName</td>
+                            <td class="text-start">@attempt.StudentNo</td>
+                            <td class="text-start">@(attempt.FirstChoice ?? "—")</td>
+                            <td class="text-start">@attempt.Score</td>
+                            <td class="text-start">@attempt.DateTaken.ToLocalTime().ToString("MMM d, yyyy")</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @for (var i = 0; i < Model.TopAttempts.Count; i++)
-                        {
-                            var attempt = Model.TopAttempts[i];
-                            <tr>
-                                <td class="text-muted">@(i + 1)</td>
-                                <td class="fw-semibold">@attempt.ApplicantName</td>
-                                <td>@attempt.StudentNo</td>
-                                <td>@(attempt.FirstChoice ?? "—")</td>
-                                <td class="text-end fw-semibold">@attempt.Score</td>
-                                <td class="text-end text-muted">@attempt.DateTaken.ToLocalTime().ToString("MMM d, yyyy")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                </tbody>
+            </table>
         }
     </div>
 </div>
 
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
+}
+
 @section Scripts {
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(function () {
+            if ($('#topScoresTable').length) {
+                initEntityTable('topScoresTable', { order: [] });
+            }
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
         (function () {

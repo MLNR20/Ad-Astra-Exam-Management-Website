@@ -1,12 +1,12 @@
 @using AAExamManagementSystem.Models.Entities
-<nav id="sidebar" class="sidebar flex-shrink-0 bg-white border-end">
-    <div class="sidebar-inner d-flex flex-column h-100 p-3">
-        <a asp-area="" asp-page="/Index" class="sidebar-brand d-flex align-items-center gap-2 mb-3 text-dark text-decoration-none">
+<nav id="sidebar" class="sidebar flex-shrink-0 bg-white border-end d-flex flex-column">
+    <div class="sidebar-header d-flex align-items-center justify-content-center px-3 border-bottom">
+        <a asp-area="" asp-page="/Index" class="sidebar-brand d-flex align-items-center gap-2 text-dark text-decoration-none">
             <span class="sidebar-logo-badge" aria-hidden="true"></span>
             <span class="fs-5 fw-semibold sidebar-label">EMS Dashboard</span>
         </a>
-        <hr>
-
+    </div>
+    <div class="sidebar-inner d-flex flex-column flex-grow-1 p-3">
         @if (User.IsInRole(Roles.Applicant))
         {
             <ul class="nav nav-pills flex-column mb-auto">

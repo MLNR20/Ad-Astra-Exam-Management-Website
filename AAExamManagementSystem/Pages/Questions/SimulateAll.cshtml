@@ -8,21 +8,29 @@
 <div class="exam-sim-hero d-flex flex-column align-items-center justify-content-center text-center px-3">
     <div class="exam-sim-hero-overlay"></div>
     <div class="exam-sim-hero-content">
-        <h1 class="exam-sim-hero-title text-white fw-bold mb-2">General Knowledge</h1>
-        <p class="exam-sim-hero-subtitle text-white mb-0">This section aims to gauge your familiarity in programming and development concepts.</p>
+        @if (Model.HasPreviousPage)
+        {
+            <h1 class="exam-sim-hero-title text-white fw-bold mb-2">SQL Queries</h1>
+            <p class="exam-sim-hero-subtitle text-white mb-0">Write the SQL query that answers each question about the schema shown.</p>
+        }
+        else
+        {
+            <h1 class="exam-sim-hero-title text-white fw-bold mb-2">General Knowledge</h1>
+            <p class="exam-sim-hero-subtitle text-white mb-0">This section aims to gauge your familiarity in programming and development concepts.</p>
+        }
     </div>
 </div>
 
 <div class="py-5 px-3">
     <div class="mx-auto exam-sim-wrap">
-        <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-4 mb-4">
             <div>
-                <h4 class="fw-bold mb-1">Multiple Choice Questions</h4>
+                <h4 class="fw-bold mb-1">@(Model.HasPreviousPage ? "SQL Query Questions" : "Multiple Choice Questions")</h4>
                 <h5 class="text-muted fw-normal mb-0">Answer every question below, then submit to see your score.</h5>
             </div>
             @if (Model.Questions.Count > 0)
             {
-                <span class="badge bg-primary">@Model.Questions.Sum(q => q.Score) pt(s) total</span>
+                <span class="badge bg-primary rounded-pill">@Model.Questions.Sum(q => q.Score) pt(s) total</span>
             }
         </div>
 
@@ -38,15 +46,17 @@
                 var question = Model.Questions[qi];
                 var isIdentification = question.QuestionTypeName == AAExamManagementSystem.Models.Entities.QuestionTypes.Identification;
                 <div class="exam-sim-question mb-4 pb-4 border-bottom" data-question-index="@qi" data-question-type="@question.QuestionTypeName">
-                    <h4 class="fw-semibold mb-2">
+                    <h5 class="fw-semibold mb-2">
                         @(qi + 1). @question.QuestionTitle
-                        <span class="badge bg-light text-dark ms-2">@question.Score pt(s)</span>
-                    </h4>
+                    </h5>
                     <div class="exam-sim-choices">
                         @if (isIdentification)
                         {
                             var correctAnswer = question.Choices.FirstOrDefault(c => c.IsCorrect)?.ChoiceText ?? string.Empty;
-                            <input type="text" class="form-control exam-sim-input" name="q@(qi)" id="q@(qi)_input" data-answer="@correctAnswer" placeholder="Type the programming language name" autocomplete="off" />
+                            var isSqlQuestion = question.Image != null && question.Image.Contains("sql-schema");
+                            var inputPlaceholder = isSqlQuestion ? "Type your SQL query" : "Type the programming language name";
+                            var inputClass = isSqlQuestion ? "form-control exam-sim-input exam-sim-input-sql" : "form-control exam-sim-input";
+                            <input type="text" class="@inputClass" name="q@(qi)" id="q@(qi)_input" data-answer="@correctAnswer" placeholder="@inputPlaceholder" autocomplete="off" />
                         }
                         else
                         {
@@ -62,7 +72,11 @@
                     </div>
                     @if (!string.IsNullOrEmpty(question.Image))
                     {
-                        <img src="@question.Image" class="exam-sim-question-image img-fluid rounded mt-3" alt="" />
+                        var isSqlSchemaImage = question.Image.Contains("sql-schema");
+                        var imageClass = isSqlSchemaImage
+                            ? "exam-sim-question-image exam-sim-question-image-wide img-fluid rounded mt-3 d-block mx-auto"
+                            : "exam-sim-question-image img-fluid rounded mt-3 d-block mx-auto";
+                        <img src="@question.Image" class="@imageClass" alt="" />
                     }
                     <div class="exam-sim-result mt-2" id="result@(qi)"></div>
                 </div>
@@ -70,7 +84,14 @@
             <div id="simSummary" class="d-none text-center mb-4"></div>
 
             <div class="d-flex justify-content-between mb-5">
-                <a href="/Questions" class="btn btn-outline-secondary">Exit Preview</a>
+                @if (Model.HasPreviousPage)
+                {
+                    <a href="?PageNumber=1" class="btn btn-outline-secondary">Previous</a>
+                }
+                else
+                {
+                    <a href="/Questions" class="btn btn-outline-secondary">Exit Preview</a>
+                }
                 <button type="button" id="submitAllSim" class="btn btn-primary">Submit All Answers</button>
             </div>
 
@@ -96,6 +117,20 @@
 
         .exam-sim-question-image {
             width: 33%;
+        }
+
+        .exam-sim-question-image-wide {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .exam-sim-choice .form-check-input,
+        .exam-sim-input {
+            border-color: #000;
+        }
+
+        .exam-sim-input {
+            max-width: 320px;
         }
 
         .exam-sim-hero {
@@ -136,6 +171,7 @@
         <script>
             (function () {
                 var questionCount = @Model.Questions.Count;
+                var hasNextPage = @Json.Serialize(Model.HasNextPage);
                 var submitBtn = document.getElementById('submitAllSim');
                 var summaryEl = document.getElementById('simSummary');
                 var submitted = false;
@@ -143,6 +179,10 @@
                 function questionType(qi) {
                     var el = document.querySelector('.exam-sim-question[data-question-index="' + qi + '"]');
                     return el ? el.dataset.questionType : '';
+                }
+
+                function normalizeAnswer(value) {
+                    return value.trim().replace(/;+$/, '').replace(/\s+/g, ' ').toLowerCase();
                 }
 
                 submitBtn.addEventListener('click', function () {
@@ -175,7 +215,7 @@
 
                         if (questionType(i) === 'Identification') {
                             var input = document.getElementById('q' + i + '_input');
-                            isCorrect = input.value.trim().toLowerCase() === (input.dataset.answer || '').trim().toLowerCase();
+                            isCorrect = normalizeAnswer(input.value) === normalizeAnswer(input.dataset.answer || '');
                             input.readOnly = true;
                         } else {
                             var selected = document.querySelector('input[name="q' + i + '"]:checked');
@@ -192,8 +232,11 @@
 
                     submitBtn.classList.add('d-none');
                     summaryEl.classList.remove('d-none');
+                    var nextAction = hasNextPage
+                        ? '<a href="?PageNumber=2" class="btn btn-primary">Continue to SQL Questions</a>'
+                        : '<a href="/Questions" class="btn btn-primary">Back to Questions</a>';
                     summaryEl.innerHTML = '<p class="fs-5">You answered ' + score + ' out of ' + questionCount + ' correctly.</p>' +
-                        '<a href="/Questions" class="btn btn-primary">Back to Questions</a>';
+                        nextAction;
                 });
             })();
         </script>
