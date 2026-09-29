@@ -1,4 +1,5 @@
 using AAExamManagementSystem.Data;
+using AAExamManagementSystem.Hubs;
 using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Models.Mapping;
 using AAExamManagementSystem.Repository;
@@ -21,6 +22,7 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AllowAnonymousToPage("/ResetPasswordConfirmation");
 });
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -39,6 +41,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<QuestionChoiceService>();
+builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -79,5 +82,6 @@ app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

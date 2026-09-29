@@ -1,11 +1,13 @@
-﻿@using AAExamManagementSystem.Models.Entities
+@using AAExamManagementSystem.Models.Entities
 @using Microsoft.AspNetCore.Identity
 @inject UserManager<ApplicationUser> UserManager
 @{
-    var currentUser = await UserManager.GetUserAsync(User);
-    var currentUserName = currentUser is not null
-        ? $"{currentUser.FirstName} {currentUser.LastName}".Trim()
-        : User.Identity?.Name;
+    var currentUser = User.Identity != null && User.Identity.IsAuthenticated
+        ? await UserManager.GetUserAsync(User)
+        : null;
+    var userInitial = currentUser != null && !string.IsNullOrEmpty(currentUser.FirstName)
+        ? currentUser.FirstName.Substring(0, 1).ToUpperInvariant()
+        : "?";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -30,25 +32,50 @@
             <header>
                 <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
                     <div class="container-fluid justify-content-between">
-                        <button class="btn btn-outline-secondary" type="button" id="sidebarToggle"
-                                aria-label="Toggle sidebar" aria-expanded="true" aria-controls="sidebar">
-                            <i class="bi bi-list" aria-hidden="true"></i>
-                        </button>
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="btn btn-light rounded-3 border-0" type="button" id="sidebarToggle"
+                                    aria-label="Toggle sidebar" aria-expanded="true" aria-controls="sidebar">
+                                <i class="bi bi-list" aria-hidden="true"></i>
+                            </button>
+                            @if (currentUser != null)
+                            {
+                                <span class="text-muted">Welcome, <span class="fw-semibold text-dark">@currentUser.FirstName @currentUser.LastName</span></span>
+                            }
+                        </div>
                         <div class="d-flex align-items-center gap-3">
                             <span id="currentTime" class="text-muted fw-semibold"></span>
-                            @if (!string.IsNullOrWhiteSpace(currentUserName))
-                            {
-                                <span class="fw-semibold d-flex align-items-center gap-2">
-                                    <i class="bi bi-person-circle" aria-hidden="true"></i>
-                                    @currentUserName
-                                </span>
-                            }
-                            <button type="button" class="btn btn-outline-secondary position-relative" aria-label="Notifications">
-                                <i class="bi bi-bell" aria-hidden="true"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                                    <span class="visually-hidden">New notifications</span>
-                                </span>
-                            </button>
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-light rounded-circle d-flex align-items-center justify-content-center fw-semibold border-0 text-dark"
+                                        style="width: 38px; height: 38px;" aria-label="Account" title="Account"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    @userInitial
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 200px;">
+                                    @if (currentUser != null)
+                                    {
+                                        <span class="dropdown-item-text fw-semibold text-dark">@currentUser.FirstName @currentUser.LastName</span>
+                                        <hr class="dropdown-divider" />
+                                    }
+                                    <form method="post" asp-area="" asp-page="/Logout">
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-left" aria-hidden="true"></i> Logout
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-light rounded-circle position-relative d-flex align-items-center justify-content-center border-0"
+                                        style="width: 38px; height: 38px;" aria-label="Notifications"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-bell" aria-hidden="true"></i>
+                                    <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle p-1 bg-success border border-light rounded-circle d-none">
+                                        <span class="visually-hidden">New notifications</span>
+                                    </span>
+                                </button>
+                                <div id="notificationList" class="dropdown-menu dropdown-menu-end p-2" style="min-width: 320px; max-height: 400px; overflow-y: auto;">
+                                    <span data-empty-state class="dropdown-item-text text-muted small">No notifications yet.</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </nav>
@@ -69,9 +96,11 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/sidebar.js" asp-append-version="true"></script>
     <script src="~/js/clock.js" asp-append-version="true"></script>
+    <script src="~/js/notifications.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

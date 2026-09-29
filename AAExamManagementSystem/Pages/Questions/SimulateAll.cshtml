@@ -17,8 +17,8 @@
     <div class="mx-auto exam-sim-wrap">
         <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
             <div>
-                <h1 class="h3 fw-bold mb-1">Multiple Choice Questions</h1>
-                <p class="text-muted mb-0">Answer every question below, then submit to see your score.</p>
+                <h4 class="fw-bold mb-1">Multiple Choice Questions</h4>
+                <h5 class="text-muted fw-normal mb-0">Answer every question below, then submit to see your score.</h5>
             </div>
             @if (Model.Questions.Count > 0)
             {
@@ -38,10 +38,10 @@
                 var question = Model.Questions[qi];
                 var isIdentification = question.QuestionTypeName == AAExamManagementSystem.Models.Entities.QuestionTypes.Identification;
                 <div class="exam-sim-question mb-4 pb-4 border-bottom" data-question-index="@qi" data-question-type="@question.QuestionTypeName">
-                    <p class="fs-5 mb-2">
+                    <h4 class="fw-semibold mb-2">
                         @(qi + 1). @question.QuestionTitle
                         <span class="badge bg-light text-dark ms-2">@question.Score pt(s)</span>
-                    </p>
+                    </h4>
                     <div class="exam-sim-choices">
                         @if (isIdentification)
                         {
