@@ -2,6 +2,10 @@ html {
   font-size: 14px;
 }
 
+body {
+  font-family: 'Manrope', sans-serif;
+}
+
 .p-6 {
   padding: 4rem !important;
 }
@@ -52,10 +56,34 @@ html {
   width: 240px;
 }
 
-.sidebar-link.active {
-  color: #fff !important;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+.sidebar-logo-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background-color: #4f5fe0;
+  flex-shrink: 0;
+}
+
+.nav-pills.flex-column .nav-item {
+  margin-bottom: .35rem;
+}
+
+.sidebar-link {
+  color: #495057;
+  font-weight: 500;
+  border-radius: .75rem;
+  padding: .55rem .75rem;
+}
+
+.sidebar-link:hover {
+  background-color: #f1f2f6;
+  color: #212529;
+}
+
+.nav-pills .sidebar-link.active {
+  color: #111827 !important;
+  background-color: #eceef2 !important;
+  font-weight: 600;
 }
 
 .sidebar-link i, .navbar-brand i, .navbar .nav-link i {
@@ -68,6 +96,11 @@ html {
   display: inline-block;
   font-size: 1rem;
   vertical-align: -.125em;
+  color: #8b8fa3;
+}
+
+.sidebar-link.active i {
+  color: #111827;
 }
 
 .sidebar-heading {
