@@ -101,7 +101,8 @@ html {
   display: flex;
   align-items: center;
   color: #495057;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 400;
   border-radius: .75rem;
   padding: .55rem .75rem;
 }
