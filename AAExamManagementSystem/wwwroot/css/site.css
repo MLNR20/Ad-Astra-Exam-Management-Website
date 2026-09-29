@@ -62,6 +62,14 @@ html {
   margin-right: .5rem;
 }
 
+.sidebar-link i {
+  width: 1.1rem;
+  text-align: center;
+  display: inline-block;
+  font-size: 1rem;
+  vertical-align: -.125em;
+}
+
 .sidebar-heading {
   letter-spacing: .04em;
   font-size: .75rem;

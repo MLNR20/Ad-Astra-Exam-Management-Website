@@ -30,7 +30,7 @@
     <div class="card-body">
         @if (Model.Items.Count == 0)
         {
-            <span class="badge rounded-pill text-bg-primary fs-6 fw-semibold px-3 py-2">@Model.EmptyMessage</span>
+            <div class="alert alert-info mb-0" role="alert">@Model.EmptyMessage</div>
         }
         else
         {
