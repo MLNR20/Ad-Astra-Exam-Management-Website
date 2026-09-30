@@ -16,7 +16,10 @@
 <body class="bg-light d-flex flex-column min-vh-100">
     <nav class="navbar navbar-light bg-white border-bottom mb-0">
         <div class="container-fluid">
-            <span class="navbar-brand mb-0 fw-semibold"><i class="bi bi-eye" aria-hidden="true"></i>Exam Simulation Preview</span>
+            <div class="d-flex align-items-center gap-4">
+                <span class="navbar-brand mb-0 fw-semibold"><i class="bi bi-eye" aria-hidden="true"></i>Exam Simulation Preview</span>
+                @await RenderSectionAsync("NavbarTimer", required: false)
+            </div>
         </div>
     </nav>
     <main role="main" class="flex-grow-1">

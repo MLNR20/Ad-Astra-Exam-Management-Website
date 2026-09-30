@@ -1,0 +1,78 @@
+@page
+@model AAExamManagementSystem.Pages.RoleAssignments.IndexModel
+@{
+    ViewData["Title"] = "Role Assignments";
+}
+
+@await Component.InvokeAsync("EntityTable", new
+{
+    tableId = "roleAssignmentsTable",
+    basePath = "/RoleAssignments",
+    emptyMessage = "No role assignments found.",
+    items = Model.Assignments.Select(a => new EntityTableRow(a.Id, a.UserName, Roles: a.RoleName)),
+    title = "Role Assignments",
+    addButtonText = "New Assignment",
+    addButtonModalTarget = "#createRoleAssignmentModal",
+    showRolesColumn = true,
+    confirmDeleteWithSweetAlert = true,
+    confirmCreateWithSweetAlert = true,
+    entityName = "Role Assignment"
+})
+
+<div class="modal fade" id="createRoleAssignmentModal" tabindex="-1" aria-labelledby="createRoleAssignmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Create" class="js-sweetalert-create-form">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createRoleAssignmentModalLabel">New Role Assignment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-3">
+                        <label asp-for="NewAssignment.UserId" class="form-label">User</label>
+                        <select asp-for="NewAssignment.UserId" class="form-select" asp-items="Model.UserOptions">
+                            <option value="">-- Select User --</option>
+                        </select>
+                        <span asp-validation-for="NewAssignment.UserId" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="NewAssignment.RoleId" class="form-label">Role</label>
+                        <select asp-for="NewAssignment.RoleId" class="form-select" asp-items="Model.RoleOptions">
+                            <option value="">-- Select Role --</option>
+                        </select>
+                        <span asp-validation-for="NewAssignment.RoleId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Assign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="~/js/sweetalert-toast.js" asp-append-version="true"></script>
+    <partial name="_SuccessToast" />
+    <script>
+        $(function () {
+            if ($('#roleAssignmentsTable').length) {
+                initEntityTable('roleAssignmentsTable');
+            }
+            @if (Model.ShowCreateModal)
+            {
+                <text>new bootstrap.Modal(document.getElementById('createRoleAssignmentModal')).show();</text>
+            }
+        });
+    </script>
+}

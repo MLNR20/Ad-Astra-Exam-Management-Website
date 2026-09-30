@@ -50,6 +50,9 @@
                 <li class="nav-item">
                     <a asp-area="" asp-page="/Roles/Index" class="nav-link text-dark sidebar-link" title="Roles"><i class="bi bi-person-badge" aria-hidden="true"></i> <span class="sidebar-label">Roles</span></a>
                 </li>
+                <li class="nav-item">
+                    <a asp-area="" asp-page="/RoleAssignments/Index" class="nav-link text-dark sidebar-link" title="Role Assignments"><i class="bi bi-person-check" aria-hidden="true"></i> <span class="sidebar-label">Role Assignments</span></a>
+                </li>
                 @if (User.IsInRole(Roles.Admin))
                 {
                     <li class="nav-item">

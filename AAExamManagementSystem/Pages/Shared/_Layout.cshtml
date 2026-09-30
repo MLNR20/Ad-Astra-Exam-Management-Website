@@ -42,6 +42,13 @@
                                 <span class="text-muted">Welcome, <span class="fw-semibold text-dark">@currentUser.FirstName @currentUser.LastName</span></span>
                             }
                         </div>
+                        <div class="flex-grow-1 mx-3 navbar-search-wrapper position-relative">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted" aria-hidden="true"></i></span>
+                                <input type="search" id="navbarSearch" class="form-control border-start-0" placeholder="Search pages..." aria-label="Search pages" autocomplete="off">
+                            </div>
+                            <div id="navbarSearchResults" class="list-group position-absolute w-100 shadow-sm d-none"></div>
+                        </div>
                         <div class="d-flex align-items-center gap-3">
                             <span id="currentTime" class="text-muted fw-semibold"></span>
                             <div class="dropdown">
@@ -101,6 +108,7 @@
     <script src="~/js/sidebar.js" asp-append-version="true"></script>
     <script src="~/js/clock.js" asp-append-version="true"></script>
     <script src="~/js/notifications.js" asp-append-version="true"></script>
+    <script src="~/js/navbar-search.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

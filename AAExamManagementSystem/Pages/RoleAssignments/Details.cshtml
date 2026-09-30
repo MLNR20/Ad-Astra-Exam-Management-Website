@@ -1,0 +1,17 @@
+@page "{id}"
+@model AAExamManagementSystem.Pages.RoleAssignments.DetailsModel
+@{
+    ViewData["Title"] = "Role Assignment Details";
+}
+
+@await Component.InvokeAsync("DetailsCard", new
+{
+    title = "Role Assignment Details",
+    fields = new[]
+    {
+        new DetailsField("User", Model.Assignment.UserName),
+        new DetailsField("Role", Model.Assignment.RoleName)
+    },
+    editHref = $"/RoleAssignments/Edit/{Model.Assignment.Id}",
+    backHref = "/RoleAssignments"
+})

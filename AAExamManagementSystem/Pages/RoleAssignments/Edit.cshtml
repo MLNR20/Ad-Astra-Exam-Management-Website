@@ -1,0 +1,31 @@
+@page "{id}"
+@model AAExamManagementSystem.Pages.RoleAssignments.EditModel
+@{
+    ViewData["Title"] = "Edit Role Assignment";
+}
+
+<edit-card title="Edit Role Assignment">
+    <div class="row">
+        <div class="col-md-4">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <div class="mb-3">
+                    <label class="form-label">User</label>
+                    <input type="text" class="form-control" value="@Model.UserDisplayName" disabled />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Assignment.RoleId" class="form-label">Role</label>
+                    <select asp-for="Assignment.RoleId" class="form-select" asp-items="Model.RoleOptions"></select>
+                    <span asp-validation-for="Assignment.RoleId" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</edit-card>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
