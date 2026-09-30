@@ -39,6 +39,8 @@ public class MappingProfile : Profile
 
         CreateMap<Notification, NotificationDto>();
 
+        CreateMap<WebPage, WebPageDto>();
+
         CreateMap<Applicant, ApplicantDto>();
         CreateMap<ApplicantRegisterDto, Applicant>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())

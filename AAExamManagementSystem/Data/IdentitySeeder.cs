@@ -11,6 +11,21 @@ public static class IdentitySeeder
     private const string AdminEmail = "admin@aaexams.local";
     private const string AdminPassword = "P@ssword2026!";
 
+    private static readonly (string Name, string Url, string Icon, string Category, int DisplayOrder)[] WebPages =
+    {
+        ("Dashboard", "/Index", "bi-grid-1x2", "Overview", 0),
+        ("Applicant Portal", "/ApplicantPortal", "bi-mortarboard", "Overview", 1),
+        ("Analytics", "/Analytics/Index", "bi-bar-chart-line", "Overview", 2),
+        ("Departments", "/Departments/Index", "bi-building", "Academics", 3),
+        ("Sections", "/Sections/Index", "bi-diagram-3", "Academics", 4),
+        ("Courses", "/Courses/Index", "bi-journal-bookmark", "Academics", 5),
+        ("Questions & Choices", "/Questions/Index", "bi-question-circle", "Academics", 6),
+        ("Users", "/Users/Index", "bi-people", "Administration", 7),
+        ("Roles", "/Roles/Index", "bi-person-badge", "Administration", 8),
+        ("Role Assignments", "/RoleAssignments/Index", "bi-person-check", "Administration", 9),
+        ("Audit Logs", "/AuditLogs/Index", "bi-clipboard-data", "Administration", 10)
+    };
+
     public static async Task SeedAsync(IServiceProvider services)
     {
         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
@@ -40,6 +55,30 @@ public static class IdentitySeeder
             if (!exists)
             {
                 dbContext.QuestionTypes.Add(new QuestionType { Name = questionTypeName });
+            }
+        }
+
+        foreach (var (name, url, icon, category, displayOrder) in WebPages)
+        {
+            var page = dbContext.WebPages.FirstOrDefault(p => p.Url == url);
+            if (page is null)
+            {
+                dbContext.WebPages.Add(new WebPage
+                {
+                    Name = name,
+                    Url = url,
+                    Icon = icon,
+                    Category = category,
+                    DisplayOrder = displayOrder
+                });
+            }
+            else
+            {
+                page.Name = name;
+                page.Icon = icon;
+                page.Category = category;
+                page.DisplayOrder = displayOrder;
+                page.IsActive = true;
             }
         }
 

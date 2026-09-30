@@ -23,6 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<Attempt> Attempts => Set<Attempt>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<WebPage> WebPages => Set<WebPage>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -120,5 +121,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
         builder.Entity<Notification>()
             .HasIndex(n => new { n.UserId, n.IsRead });
+
+        builder.Entity<WebPage>()
+            .HasIndex(w => w.Url)
+            .IsUnique();
     }
 }
