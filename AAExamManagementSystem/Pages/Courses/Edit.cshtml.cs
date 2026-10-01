@@ -52,6 +52,7 @@ public class EditModel : PageModel
         course.Name = Course.Name;
         course.SchoolName = Course.SchoolName;
         course.IsActive = Course.IsActive;
+        course.DateUpdated = DateTime.UtcNow;
         _repository.Update(course);
         await _repository.SaveChangesAsync();
 

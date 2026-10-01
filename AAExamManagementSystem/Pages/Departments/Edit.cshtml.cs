@@ -51,6 +51,7 @@ public class EditModel : PageModel
 
         department.Name = Department.Name;
         department.IsActive = Department.IsActive;
+        department.DateUpdated = DateTime.UtcNow;
         _repository.Update(department);
         await _repository.SaveChangesAsync();
 

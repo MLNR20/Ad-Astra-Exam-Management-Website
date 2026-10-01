@@ -1,8 +1,10 @@
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
+using AAExamManagementSystem.Repository;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AAExamManagementSystem.Controllers;
 
@@ -13,11 +15,13 @@ public class RoleAssignmentsController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly ApplicationDbContext _dbContext;
 
-    public RoleAssignmentsController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+    public RoleAssignmentsController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ApplicationDbContext dbContext)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _dbContext = dbContext;
     }
 
     [HttpGet]
@@ -52,11 +56,10 @@ public class RoleAssignmentsController : ControllerBase
         if (await _userManager.IsInRoleAsync(user, role.Name))
             return BadRequest($"User is already assigned to role '{role.Name}'.");
 
-        var result = await _userManager.AddToRoleAsync(user, role.Name);
-        if (!result.Succeeded) return BadRequest(result.Errors);
+        await AssignRoleAsync(user.Id, role.Id);
 
-        var assignment = ToDto(user, role);
-        return CreatedAtAction(nameof(GetById), new { id = assignment.Id, version = "1.0" }, assignment);
+        var assignment = await BuildAssignmentAsync(user.Id, role.Id);
+        return CreatedAtAction(nameof(GetById), new { id = assignment!.Id, version = "1.0" }, assignment);
     }
 
     [HttpPut("{id}")]
@@ -82,11 +85,8 @@ public class RoleAssignmentsController : ControllerBase
         if (await _userManager.IsInRoleAsync(user, newRole.Name))
             return BadRequest($"User is already assigned to role '{newRole.Name}'.");
 
-        var removeResult = await _userManager.RemoveFromRoleAsync(user, oldRole.Name);
-        if (!removeResult.Succeeded) return BadRequest(removeResult.Errors);
-
-        var addResult = await _userManager.AddToRoleAsync(user, newRole.Name);
-        if (!addResult.Succeeded) return BadRequest(addResult.Errors);
+        await DeactivateUserRoleAsync(userId, oldRoleId);
+        await AssignRoleAsync(userId, newRole.Id);
 
         return NoContent();
     }
@@ -103,30 +103,72 @@ public class RoleAssignmentsController : ControllerBase
         var role = await _roleManager.FindByIdAsync(roleId);
         if (user is null || role is null || string.IsNullOrEmpty(role.Name)) return NotFound();
 
-        var result = await _userManager.RemoveFromRoleAsync(user, role.Name);
-        if (!result.Succeeded) return BadRequest(result.Errors);
+        var deactivated = await DeactivateUserRoleAsync(userId, roleId);
+        if (!deactivated) return NotFound();
 
         return NoContent();
     }
 
-    private async Task<List<RoleAssignmentDto>> BuildAssignmentsAsync()
+    /// <summary>Creates the user-role row, or reactivates a previously deactivated one, preserving its CreatedAt.</summary>
+    private async Task AssignRoleAsync(string userId, string roleId)
     {
-        var users = _userManager.Users.OrderBy(u => u.UserName).ToList();
-        var assignments = new List<RoleAssignmentDto>();
+        var existing = await _dbContext.UserRoles.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
 
-        foreach (var user in users)
+        if (existing is null)
         {
-            var roleNames = await _userManager.GetRolesAsync(user);
-            foreach (var roleName in roleNames.OrderBy(r => r))
-            {
-                var role = await _roleManager.FindByNameAsync(roleName);
-                if (role is null) continue;
-
-                assignments.Add(ToDto(user, role));
-            }
+            _dbContext.UserRoles.Add(new ApplicationUserRole { UserId = userId, RoleId = roleId });
+        }
+        else
+        {
+            existing.IsActive = true;
+            existing.DateUpdated = DateTime.UtcNow;
         }
 
-        return assignments;
+        await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task<bool> DeactivateUserRoleAsync(string userId, string roleId)
+    {
+        var userRole = await _dbContext.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+        if (userRole is null) return false;
+
+        userRole.IsActive = false;
+        userRole.DateUpdated = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    private async Task<List<RoleAssignmentDto>> BuildAssignmentsAsync()
+    {
+        var rows = await (
+            from ur in _dbContext.UserRoles.IgnoreQueryFilters()
+            join u in _dbContext.Users on ur.UserId equals u.Id
+            join r in _dbContext.Roles on ur.RoleId equals r.Id
+            orderby u.UserName, r.Name
+            select new
+            {
+                u.Id,
+                u.FirstName,
+                u.LastName,
+                RoleId = r.Id,
+                RoleName = r.Name,
+                ur.CreatedAt,
+                ur.DateUpdated,
+                ur.IsActive
+            }).ToListAsync();
+
+        return rows.Select(row => new RoleAssignmentDto
+        {
+            Id = RoleAssignmentId.Combine(row.Id, row.RoleId),
+            UserId = row.Id,
+            UserName = $"{row.FirstName} {row.LastName}".Trim(),
+            RoleId = row.RoleId,
+            RoleName = row.RoleName ?? string.Empty,
+            IsActive = row.IsActive,
+            CreatedAt = row.CreatedAt,
+            DateUpdated = row.DateUpdated
+        }).ToList();
     }
 
     private async Task<RoleAssignmentDto?> BuildAssignmentAsync(string userId, string roleId)
@@ -135,17 +177,20 @@ public class RoleAssignmentsController : ControllerBase
         var role = await _roleManager.FindByIdAsync(roleId);
         if (user is null || role is null || string.IsNullOrEmpty(role.Name)) return null;
 
-        if (!await _userManager.IsInRoleAsync(user, role.Name)) return null;
+        var userRole = await _dbContext.UserRoles.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+        if (userRole is null) return null;
 
-        return ToDto(user, role);
+        return new RoleAssignmentDto
+        {
+            Id = RoleAssignmentId.Combine(user.Id, role.Id),
+            UserId = user.Id,
+            UserName = $"{user.FirstName} {user.LastName}".Trim(),
+            RoleId = role.Id,
+            RoleName = role.Name ?? string.Empty,
+            IsActive = userRole.IsActive,
+            CreatedAt = userRole.CreatedAt,
+            DateUpdated = userRole.DateUpdated
+        };
     }
-
-    private static RoleAssignmentDto ToDto(ApplicationUser user, ApplicationRole role) => new()
-    {
-        Id = RoleAssignmentId.Combine(user.Id, role.Id),
-        UserId = user.Id,
-        UserName = $"{user.FirstName} {user.LastName}".Trim(),
-        RoleId = role.Id,
-        RoleName = role.Name ?? string.Empty
-    };
 }

@@ -10,7 +10,9 @@
     fields = new[]
     {
         new DetailsField("Id", Model.Role.Id),
-        new DetailsField("Name", Model.Role.Name)
+        new DetailsField("Name", Model.Role.Name),
+        new DetailsField("Date Created", Model.Role.CreatedAt.ToString("MMM d, yyyy")),
+        new DetailsField("Date Updated", Model.Role.DateUpdated.ToString("MMM d, yyyy"))
     },
     showStatus = true,
     isActive = Model.Role.IsActive,

@@ -56,6 +56,7 @@ public class IndexModel : PageModel
         }
 
         department.IsActive = false;
+        department.DateUpdated = DateTime.UtcNow;
         _repository.Update(department);
         await _repository.SaveChangesAsync();
 
@@ -72,6 +73,7 @@ public class IndexModel : PageModel
         }
 
         department.IsActive = true;
+        department.DateUpdated = DateTime.UtcNow;
         _repository.Update(department);
         await _repository.SaveChangesAsync();
 

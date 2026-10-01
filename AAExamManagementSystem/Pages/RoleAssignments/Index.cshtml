@@ -9,14 +9,18 @@
     tableId = "roleAssignmentsTable",
     basePath = "/RoleAssignments",
     emptyMessage = "No role assignments found.",
-    items = Model.Assignments.Select(a => new EntityTableRow(a.Id, a.UserName, Roles: a.RoleName)),
+    items = Model.Assignments.Select(a => new EntityTableRow(a.Id, a.UserName, a.IsActive, a.CreatedAt, Roles: a.RoleName, DateUpdated: a.DateUpdated)),
     title = "Role Assignments",
     addButtonText = "New Assignment",
     addButtonModalTarget = "#createRoleAssignmentModal",
     showRolesColumn = true,
-    confirmDeleteWithSweetAlert = true,
+    showStatusColumn = true,
+    showDateCreatedColumn = true,
+    showDateUpdatedColumn = true,
     confirmCreateWithSweetAlert = true,
-    entityName = "Role Assignment"
+    confirmDeleteWithSweetAlert = true,
+    entityName = "Role Assignment",
+    useSoftDelete = true
 })
 
 <div class="modal fade" id="createRoleAssignmentModal" tabindex="-1" aria-labelledby="createRoleAssignmentModalLabel" aria-hidden="true">

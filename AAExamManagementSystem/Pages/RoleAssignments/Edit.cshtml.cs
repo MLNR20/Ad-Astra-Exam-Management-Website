@@ -1,9 +1,11 @@
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
+using AAExamManagementSystem.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace AAExamManagementSystem.Pages.RoleAssignments;
 
@@ -11,11 +13,13 @@ public class EditModel : PageModel
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly ApplicationDbContext _dbContext;
 
-    public EditModel(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+    public EditModel(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ApplicationDbContext dbContext)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _dbContext = dbContext;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -42,7 +46,9 @@ public class EditModel : PageModel
             return NotFound();
         }
 
-        if (!await _userManager.IsInRoleAsync(user, role.Name))
+        var userRoleExists = await _dbContext.UserRoles.IgnoreQueryFilters()
+            .AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+        if (!userRoleExists)
         {
             return NotFound();
         }
@@ -92,31 +98,41 @@ public class EditModel : PageModel
                 return Page();
             }
 
-            var removeResult = await _userManager.RemoveFromRoleAsync(user, oldRole.Name);
-            if (!removeResult.Succeeded)
-            {
-                foreach (var error in removeResult.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                LoadRoleOptions(oldRoleId);
-                return Page();
-            }
-
-            var addResult = await _userManager.AddToRoleAsync(user, newRole.Name);
-            if (!addResult.Succeeded)
-            {
-                foreach (var error in addResult.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                LoadRoleOptions(oldRoleId);
-                return Page();
-            }
+            await DeactivateUserRoleAsync(userId, oldRoleId);
+            await AssignRoleAsync(userId, newRole.Id);
         }
 
         TempData["SuccessMessage"] = $"Role assignment for '{user.UserName}' updated successfully.";
         return RedirectToPage("Index");
+    }
+
+    /// <summary>Creates the user-role row, or reactivates a previously deactivated one, preserving its CreatedAt.</summary>
+    private async Task AssignRoleAsync(string userId, string roleId)
+    {
+        var existing = await _dbContext.UserRoles.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+
+        if (existing is null)
+        {
+            _dbContext.UserRoles.Add(new ApplicationUserRole { UserId = userId, RoleId = roleId });
+        }
+        else
+        {
+            existing.IsActive = true;
+            existing.DateUpdated = DateTime.UtcNow;
+        }
+
+        await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task DeactivateUserRoleAsync(string userId, string roleId)
+    {
+        var userRole = await _dbContext.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+        if (userRole is null) return;
+
+        userRole.IsActive = false;
+        userRole.DateUpdated = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
     }
 
     private void LoadRoleOptions(string currentRoleId)

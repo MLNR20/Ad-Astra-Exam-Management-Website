@@ -61,6 +61,7 @@ public class RolesController : ControllerBase
 
         role.Name = dto.Name;
         role.IsActive = dto.IsActive;
+        role.DateUpdated = DateTime.UtcNow;
         var result = await _roleManager.UpdateAsync(role);
         if (!result.Succeeded) return BadRequest(result.Errors);
 
@@ -74,6 +75,7 @@ public class RolesController : ControllerBase
         if (role is null) return NotFound();
 
         role.IsActive = false;
+        role.DateUpdated = DateTime.UtcNow;
         var result = await _roleManager.UpdateAsync(role);
         if (!result.Succeeded) return BadRequest(result.Errors);
 

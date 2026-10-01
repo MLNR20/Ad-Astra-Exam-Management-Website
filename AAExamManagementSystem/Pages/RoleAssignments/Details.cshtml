@@ -10,8 +10,12 @@
     fields = new[]
     {
         new DetailsField("User", Model.Assignment.UserName),
-        new DetailsField("Role", Model.Assignment.RoleName)
+        new DetailsField("Role", Model.Assignment.RoleName),
+        new DetailsField("Date Created", Model.Assignment.CreatedAt.ToString("MMM d, yyyy")),
+        new DetailsField("Date Updated", Model.Assignment.DateUpdated.ToString("MMM d, yyyy"))
     },
+    showStatus = true,
+    isActive = Model.Assignment.IsActive,
     editHref = $"/RoleAssignments/Edit/{Model.Assignment.Id}",
     backHref = "/RoleAssignments"
 })

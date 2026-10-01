@@ -10,7 +10,9 @@
     fields = new[]
     {
         new DetailsField("Id", Model.Department.Id.ToString()),
-        new DetailsField("Name", Model.Department.Name)
+        new DetailsField("Name", Model.Department.Name),
+        new DetailsField("Date Created", Model.Department.CreatedAt.ToString("MMM d, yyyy")),
+        new DetailsField("Date Updated", Model.Department.DateUpdated.ToString("MMM d, yyyy"))
     },
     showStatus = true,
     isActive = Model.Department.IsActive,

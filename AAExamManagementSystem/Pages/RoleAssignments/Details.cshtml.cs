@@ -1,8 +1,10 @@
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
+using AAExamManagementSystem.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace AAExamManagementSystem.Pages.RoleAssignments;
 
@@ -10,11 +12,13 @@ public class DetailsModel : PageModel
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly ApplicationDbContext _dbContext;
 
-    public DetailsModel(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+    public DetailsModel(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ApplicationDbContext dbContext)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _dbContext = dbContext;
     }
 
     public RoleAssignmentDto Assignment { get; set; } = new();
@@ -33,7 +37,9 @@ public class DetailsModel : PageModel
             return NotFound();
         }
 
-        if (!await _userManager.IsInRoleAsync(user, role.Name))
+        var userRole = await _dbContext.UserRoles.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(ur => ur.UserId == user.Id && ur.RoleId == role.Id);
+        if (userRole is null)
         {
             return NotFound();
         }
@@ -44,7 +50,10 @@ public class DetailsModel : PageModel
             UserId = user.Id,
             UserName = $"{user.FirstName} {user.LastName}".Trim(),
             RoleId = role.Id,
-            RoleName = role.Name
+            RoleName = role.Name,
+            IsActive = userRole.IsActive,
+            CreatedAt = userRole.CreatedAt,
+            DateUpdated = userRole.DateUpdated
         };
         return Page();
     }

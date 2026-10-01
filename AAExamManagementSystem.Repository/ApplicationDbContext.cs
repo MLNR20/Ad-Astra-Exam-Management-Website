@@ -1,10 +1,12 @@
 using AAExamManagementSystem.Models.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AAExamManagementSystem.Repository;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>,
+    ApplicationUserRole, IdentityUserLogin<string>, IdentityRoleClaim<string>, IdentityUserToken<string>>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -125,5 +127,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         builder.Entity<WebPage>()
             .HasIndex(w => w.Url)
             .IsUnique();
+
+        builder.Entity<ApplicationUserRole>()
+            .HasQueryFilter(ur => ur.IsActive);
     }
 }

@@ -72,6 +72,7 @@ public class IndexModel : PageModel
         }
 
         role.IsActive = false;
+        role.DateUpdated = DateTime.UtcNow;
         var result = await _roleManager.UpdateAsync(role);
         TempData["SuccessMessage"] = result.Succeeded
             ? $"Role '{role.Name}' deactivated successfully."
@@ -89,6 +90,7 @@ public class IndexModel : PageModel
         }
 
         role.IsActive = true;
+        role.DateUpdated = DateTime.UtcNow;
         var result = await _roleManager.UpdateAsync(role);
         TempData["SuccessMessage"] = result.Succeeded
             ? $"Role '{role.Name}' activated successfully."

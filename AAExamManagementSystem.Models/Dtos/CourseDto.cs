@@ -8,6 +8,8 @@ public class CourseDto
     public string Name { get; set; } = string.Empty;
     public string? SchoolName { get; set; }
     public bool IsActive { get; set; } = true;
+    public DateTime CreatedAt { get; set; }
+    public DateTime DateUpdated { get; set; }
 }
 
 public class CourseCreateUpdateDto

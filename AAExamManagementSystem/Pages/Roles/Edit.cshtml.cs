@@ -55,6 +55,7 @@ public class EditModel : PageModel
 
         role.Name = Role.Name;
         role.IsActive = Role.IsActive;
+        role.DateUpdated = DateTime.UtcNow;
         var result = await _roleManager.UpdateAsync(role);
         if (!result.Succeeded)
         {

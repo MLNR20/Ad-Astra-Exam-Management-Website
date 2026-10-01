@@ -1,9 +1,11 @@
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
+using AAExamManagementSystem.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace AAExamManagementSystem.Pages.RoleAssignments;
 
@@ -11,11 +13,13 @@ public class IndexModel : PageModel
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly ApplicationDbContext _dbContext;
 
-    public IndexModel(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+    public IndexModel(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ApplicationDbContext dbContext)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _dbContext = dbContext;
     }
 
     public IList<RoleAssignmentDto> Assignments { get; set; } = new List<RoleAssignmentDto>();
@@ -64,24 +68,13 @@ public class IndexModel : PageModel
             return Page();
         }
 
-        var result = await _userManager.AddToRoleAsync(user, role.Name);
-        if (!result.Succeeded)
-        {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-            await LoadAssignmentsAsync();
-            LoadOptions();
-            ShowCreateModal = true;
-            return Page();
-        }
+        await AssignRoleAsync(user.Id, role.Id);
 
         TempData["SuccessMessage"] = $"Role '{role.Name}' assigned to '{user.UserName}' successfully.";
         return RedirectToPage("Index");
     }
 
-    public async Task<IActionResult> OnPostDeleteAsync(string id)
+    public async Task<IActionResult> OnPostDeactivateAsync(string id)
     {
         if (!RoleAssignmentId.TryParse(id, out var userId, out var roleId))
         {
@@ -95,39 +88,94 @@ public class IndexModel : PageModel
             return NotFound();
         }
 
-        var result = await _userManager.RemoveFromRoleAsync(user, role.Name);
-        TempData["SuccessMessage"] = result.Succeeded
-            ? $"Role '{role.Name}' removed from '{user.UserName}' successfully."
-            : string.Join(" ", result.Errors.Select(e => e.Description));
+        var deactivated = await DeactivateUserRoleAsync(userId, roleId);
+        TempData["SuccessMessage"] = deactivated
+            ? $"Role '{role.Name}' deactivated for '{user.UserName}' successfully."
+            : "Role assignment could not be found.";
 
         return RedirectToPage("Index");
     }
 
-    private async Task LoadAssignmentsAsync()
+    public async Task<IActionResult> OnPostActivateAsync(string id)
     {
-        var users = _userManager.Users.OrderBy(u => u.UserName).ToList();
-        var list = new List<RoleAssignmentDto>();
-
-        foreach (var user in users)
+        if (!RoleAssignmentId.TryParse(id, out var userId, out var roleId))
         {
-            var roleNames = await _userManager.GetRolesAsync(user);
-            foreach (var roleName in roleNames.OrderBy(r => r))
-            {
-                var role = await _roleManager.FindByNameAsync(roleName);
-                if (role is null) continue;
-
-                list.Add(new RoleAssignmentDto
-                {
-                    Id = RoleAssignmentId.Combine(user.Id, role.Id),
-                    UserId = user.Id,
-                    UserName = $"{user.FirstName} {user.LastName}".Trim(),
-                    RoleId = role.Id,
-                    RoleName = role.Name ?? string.Empty
-                });
-            }
+            return NotFound();
         }
 
-        Assignments = list;
+        var user = await _userManager.FindByIdAsync(userId);
+        var role = await _roleManager.FindByIdAsync(roleId);
+        if (user is null || role is null || string.IsNullOrEmpty(role.Name))
+        {
+            return NotFound();
+        }
+
+        await AssignRoleAsync(userId, roleId);
+        TempData["SuccessMessage"] = $"Role '{role.Name}' activated for '{user.UserName}' successfully.";
+
+        return RedirectToPage("Index");
+    }
+
+    /// <summary>Creates the user-role row, or reactivates a previously deactivated one, preserving its CreatedAt.</summary>
+    private async Task AssignRoleAsync(string userId, string roleId)
+    {
+        var existing = await _dbContext.UserRoles.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+
+        if (existing is null)
+        {
+            _dbContext.UserRoles.Add(new ApplicationUserRole { UserId = userId, RoleId = roleId });
+        }
+        else
+        {
+            existing.IsActive = true;
+            existing.DateUpdated = DateTime.UtcNow;
+        }
+
+        await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task<bool> DeactivateUserRoleAsync(string userId, string roleId)
+    {
+        var userRole = await _dbContext.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+        if (userRole is null) return false;
+
+        userRole.IsActive = false;
+        userRole.DateUpdated = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    private async Task LoadAssignmentsAsync()
+    {
+        var rows = await (
+            from ur in _dbContext.UserRoles.IgnoreQueryFilters()
+            join u in _dbContext.Users on ur.UserId equals u.Id
+            join r in _dbContext.Roles on ur.RoleId equals r.Id
+            orderby u.UserName, r.Name
+            select new
+            {
+                u.Id,
+                u.FirstName,
+                u.LastName,
+                RoleId = r.Id,
+                RoleName = r.Name,
+                ur.CreatedAt,
+                ur.DateUpdated,
+                ur.IsActive
+            }).ToListAsync();
+
+        Assignments = rows.Select(row => new RoleAssignmentDto
+        {
+            Id = RoleAssignmentId.Combine(row.Id, row.RoleId),
+            UserId = row.Id,
+            UserName = $"{row.FirstName} {row.LastName}".Trim(),
+            RoleId = row.RoleId,
+            RoleName = row.RoleName ?? string.Empty,
+            IsActive = row.IsActive,
+            CreatedAt = row.CreatedAt,
+            DateUpdated = row.DateUpdated
+        }).ToList();
     }
 
     private void LoadOptions()

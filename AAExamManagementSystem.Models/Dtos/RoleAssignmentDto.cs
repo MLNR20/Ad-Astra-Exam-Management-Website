@@ -9,6 +9,9 @@ public class RoleAssignmentDto
     public string UserName { get; set; } = string.Empty;
     public string RoleId { get; set; } = string.Empty;
     public string RoleName { get; set; } = string.Empty;
+    public bool IsActive { get; set; } = true;
+    public DateTime CreatedAt { get; set; }
+    public DateTime DateUpdated { get; set; }
 }
 
 public class RoleAssignmentCreateDto

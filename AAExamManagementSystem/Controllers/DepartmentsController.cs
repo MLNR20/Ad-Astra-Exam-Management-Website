@@ -53,6 +53,7 @@ public class DepartmentsController : ControllerBase
 
         department.Name = dto.Name;
         department.IsActive = dto.IsActive;
+        department.DateUpdated = DateTime.UtcNow;
         _repository.Update(department);
         await _repository.SaveChangesAsync();
         return NoContent();
@@ -65,6 +66,7 @@ public class DepartmentsController : ControllerBase
         if (department is null) return NotFound();
 
         department.IsActive = false;
+        department.DateUpdated = DateTime.UtcNow;
         _repository.Update(department);
         await _repository.SaveChangesAsync();
         return NoContent();
