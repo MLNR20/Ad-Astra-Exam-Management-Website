@@ -93,7 +93,7 @@ public class IndexModel : PageModel
         var questionTypeNames = questionTypes.ToDictionary(qt => qt.Id, qt => qt.Name);
         var sectionNames = sections.ToDictionary(s => s.Id, s => s.Name);
 
-        Questions = _mapper.Map<IList<QuestionDto>>(questions.OrderByDescending(q => q.Id));
+        Questions = _mapper.Map<IList<QuestionDto>>(questions.OrderByDescending(q => q.DateCreated));
         foreach (var dto in Questions)
         {
             dto.QuestionTypeName = questionTypeNames.GetValueOrDefault(dto.QuestionTypeId, "—");

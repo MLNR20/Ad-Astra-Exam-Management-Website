@@ -116,8 +116,28 @@ header .navbar {
   width: 28px;
   height: 28px;
   border-radius: 8px;
+  background-color: #000;
+  flex-shrink: 0;
+}
+
+.sidebar-logo-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.navbar-brand-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   background-color: #4f5fe0;
   flex-shrink: 0;
+}
+
+.navbar-brand-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .nav-pills.flex-column .nav-item {

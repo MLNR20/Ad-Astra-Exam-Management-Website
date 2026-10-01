@@ -65,6 +65,6 @@ public class IndexModel : PageModel
     private async Task LoadChoicesAsync()
     {
         var choices = await _repository.GetAllAsync();
-        Choices = _mapper.Map<IList<ChoiceDto>>(choices.OrderByDescending(c => c.Id));
+        Choices = _mapper.Map<IList<ChoiceDto>>(choices.OrderByDescending(c => c.DateCreated));
     }
 }
