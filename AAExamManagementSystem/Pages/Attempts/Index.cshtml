@@ -1,0 +1,59 @@
+@page
+@model AAExamManagementSystem.Pages.Attempts.IndexModel
+@{
+    ViewData["Title"] = "Exam Attempts";
+}
+
+<h1 class="h4 fw-bold mb-4"><i class="bi bi-clipboard-check" aria-hidden="true"></i> Exam Attempts</h1>
+
+@if (Model.Attempts.Count == 0)
+{
+    <p class="text-muted">No exam attempts have been submitted yet.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Applicant</th>
+                    <th>Student No.</th>
+                    <th>Section</th>
+                    <th>Date Taken</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var attempt in Model.Attempts)
+                {
+                    <tr>
+                        <td>@attempt.ApplicantName</td>
+                        <td>@attempt.StudentNo</td>
+                        <td>@(attempt.Section ?? "-")</td>
+                        <td>@(attempt.DateTaken ?? "-")</td>
+                        <td>@attempt.TotalScore / @attempt.MaxScore</td>
+                        <td>
+                            @if (attempt.IsApproved)
+                            {
+                                <span class="badge bg-success">Approved</span>
+                            }
+                            else if (attempt.PendingEvaluationCount > 0)
+                            {
+                                <span class="badge bg-warning text-dark">Needs Evaluation</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Pending Approval</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-page="/Attempts/Review" asp-route-id="@attempt.Id" class="btn btn-sm btn-outline-primary">Review</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

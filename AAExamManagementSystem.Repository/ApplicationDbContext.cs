@@ -93,6 +93,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(a => a.QuestionId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Entity<Answer>()
+            .HasOne(a => a.Attempt)
+            .WithMany(at => at.Answers)
+            .HasForeignKey(a => a.AttemptId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.Entity<Attempt>()
             .HasOne(a => a.Applicant)
             .WithMany(ap => ap.Attempts)

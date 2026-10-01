@@ -5,6 +5,8 @@ public class Answer
     public int Id { get; set; }
     public int ApplicantId { get; set; }
     public Applicant Applicant { get; set; } = null!;
+    public int AttemptId { get; set; }
+    public Attempt Attempt { get; set; } = null!;
     public string? CheckedBy { get; set; }
     public Guid QuestionId { get; set; }
     public Question Question { get; set; } = null!;

@@ -1,0 +1,131 @@
+@page
+@model AAExamManagementSystem.Pages.Attempts.TakeModel
+@{
+    ViewData["Title"] = "Take Exam";
+    Layout = "_ExamLayout";
+}
+
+<div class="exam-sim-hero d-flex flex-column align-items-center justify-content-center text-center px-3">
+    <div class="exam-sim-hero-overlay"></div>
+    <div class="exam-sim-hero-content">
+        <h1 class="exam-sim-hero-title text-white fw-bold mb-2">Web Development Qualifying Exam</h1>
+        <p class="exam-sim-hero-subtitle text-white mb-0">Answer all 10 questions below. This exam can only be taken once.</p>
+    </div>
+</div>
+
+<div class="py-5 px-3">
+    <div class="mx-auto exam-sim-wrap">
+        @if (!Model.HasApplicantProfile)
+        {
+            <div class="alert alert-warning">No applicant profile is linked to this account.</div>
+            <a asp-page="/ApplicantPortal" class="btn btn-outline-secondary">Back to Applicant Portal</a>
+        }
+        else if (Model.AlreadyAttempted)
+        {
+            <div class="alert alert-info">
+                @if (Model.SubmittedScore.HasValue)
+                {
+                    <p class="fs-5 mb-1">You scored @Model.SubmittedScore out of @Model.SubmittedMaxScore.</p>
+                }
+                <p class="mb-0">You have already taken this exam. Your attempt is awaiting review.</p>
+            </div>
+            <a asp-page="/ApplicantPortal" class="btn btn-outline-secondary">Back to Applicant Portal</a>
+        }
+        else if (Model.Questions.Count == 0)
+        {
+            <p class="fs-5 mb-3">No active Web Development questions are available right now.</p>
+            <a asp-page="/ApplicantPortal" class="btn btn-outline-secondary">Back to Applicant Portal</a>
+        }
+        else
+        {
+            <form method="post" id="examForm">
+                <div class="d-flex flex-wrap justify-content-between align-items-end gap-4 mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-1">Web Development</h4>
+                        <h5 class="text-muted fw-normal mb-0">Select one answer for each question, then submit.</h5>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">@Model.Questions.Sum(q => q.Score) pt(s) total</span>
+                </div>
+
+                @for (var qi = 0; qi < Model.Questions.Count; qi++)
+                {
+                    var question = Model.Questions[qi];
+                    <div class="exam-sim-question mb-4 pb-4 border-bottom">
+                        <h5 class="fw-semibold mb-2">@(qi + 1). @question.QuestionTitle</h5>
+                        <div class="exam-sim-choices">
+                            @for (var ci = 0; ci < question.Choices.Count; ci++)
+                            {
+                                var choice = question.Choices[ci];
+                                <div class="form-check exam-sim-choice mb-2">
+                                    <input class="form-check-input" type="radio" name="Answers[@question.Id]" id="q@(qi)_c@(ci)" value="@choice.Id" required />
+                                    <label class="form-check-label" for="q@(qi)_c@(ci)">@choice.ChoiceText</label>
+                                </div>
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(question.Image))
+                        {
+                            <img src="@question.Image" class="exam-sim-question-image img-fluid rounded mt-3 d-block mx-auto" alt="" />
+                        }
+                    </div>
+                }
+
+                <div class="d-flex justify-content-end mb-5">
+                    <button type="submit" class="btn btn-primary">Submit Answers</button>
+                </div>
+
+                <div class="alert alert-secondary">
+                    <h2 class="h6 fw-bold mb-2">Instructions</h2>
+                    <ul class="mb-0 ps-3">
+                        <li>Select exactly one answer for each question.</li>
+                        <li>All questions must be answered before you can submit.</li>
+                        <li>Once you submit, your answers are final and cannot be changed.</li>
+                        <li>This exam can only be taken once.</li>
+                    </ul>
+                </div>
+            </form>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .exam-sim-wrap {
+            max-width: 720px;
+            width: 100%;
+        }
+
+        .exam-sim-choice .form-check-input {
+            border-color: #000;
+        }
+
+        .exam-sim-hero {
+            position: relative;
+            height: 43vh;
+            background-image: url('@Url.Content("~/images/general-knowledge-banner.webp")');
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .exam-sim-hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+        }
+
+        .exam-sim-hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 640px;
+        }
+
+        .exam-sim-hero-title {
+            font-size: 2.75rem;
+        }
+
+        .exam-sim-hero-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+    </style>
+}

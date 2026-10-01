@@ -15,4 +15,8 @@ public class Attempt
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
     public DateTime DateUpdated { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
+    public bool IsApproved { get; set; }
+    public string? ApprovedBy { get; set; }
+
+    public ICollection<Answer> Answers { get; set; } = new List<Answer>();
 }
