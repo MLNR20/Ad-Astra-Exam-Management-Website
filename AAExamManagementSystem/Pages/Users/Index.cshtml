@@ -11,6 +11,8 @@
     emptyMessage = "No users found.",
     items = Model.Users.Select(u => new EntityTableRow(u.Id, u.FullName, u.IsActive, Roles: u.Role)),
     title = "Users",
+    addButtonText = "Add New User",
+    addButtonHref = "/Users/Create",
     showRolesColumn = true,
     showStatusColumn = true,
     confirmDeleteWithSweetAlert = true,
