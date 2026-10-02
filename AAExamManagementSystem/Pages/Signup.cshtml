@@ -28,9 +28,9 @@
         </div>
     </nav>
     <main class="login-page d-flex align-items-center justify-content-center flex-grow-1 p-3">
-        <div class="card login-card signup-card border-0 shadow-sm w-100">
-            <div class="card-body p-4 p-md-5">
-                <div class="text-center mb-4">
+        <div class="card signup-wizard-card border-0 shadow-sm w-100">
+            <div class="card-body p-0">
+                <div class="text-center p-4 p-md-5 pb-3">
                     <div class="login-logo mx-auto mb-3">
                         <i class="bi bi-person-plus" aria-hidden="true"></i>
                     </div>
@@ -38,105 +38,206 @@
                     <p class="text-muted mb-0">Create your account and submit your application</p>
                 </div>
 
-                <form method="post" novalidate>
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
-
-                    <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Account Information</h2>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.UserName" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.UserName" class="form-control" autocomplete="username" autofocus />
-                            <span asp-validation-for="Input.UserName" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.Email" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.Email" class="form-control" autocomplete="email" />
-                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.Password" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
-                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
-                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
-                        </div>
+                <div class="signup-steps d-flex justify-content-center gap-3 gap-md-5 pb-4">
+                    <div class="signup-step active" data-step="1">
+                        <span class="signup-step-circle">1</span>
+                        <span class="signup-step-label">General</span>
                     </div>
+                    <div class="signup-step" data-step="2">
+                        <span class="signup-step-circle">2</span>
+                        <span class="signup-step-label">Academic</span>
+                    </div>
+                    <div class="signup-step" data-step="3">
+                        <span class="signup-step-circle">3</span>
+                        <span class="signup-step-label">Submission</span>
+                    </div>
+                </div>
 
-                    <h2 class="h6 text-uppercase text-muted fw-semibold mb-3 mt-2">Applicant Information</h2>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.StudentNo" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.StudentNo" class="form-control" />
-                            <span asp-validation-for="Input.StudentNo" class="text-danger small"></span>
+                <form method="post" id="signupForm" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mx-4 mx-md-5" role="alert"></div>
+
+                    <div class="row g-0 border-top">
+                        <div class="col-lg-8 p-4 p-md-5">
+                            <div class="signup-panel" data-panel="1">
+                                <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Account Information</h2>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.UserName" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.UserName" class="form-control" autocomplete="username" autofocus />
+                                        <span asp-validation-for="Input.UserName" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.Email" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.Email" class="form-control" autocomplete="email" />
+                                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.Password" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
+                                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
+                                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.FirstName" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.FirstName" class="form-control" />
+                                        <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.LastName" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.LastName" class="form-control" />
+                                        <span asp-validation-for="Input.LastName" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="signup-panel d-none" data-panel="2">
+                                <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Academic Information</h2>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.StudentNo" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.StudentNo" class="form-control" />
+                                        <span asp-validation-for="Input.StudentNo" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.AcademicYear" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.AcademicYear" class="form-control" placeholder="e.g. 2026-2027" />
+                                        <span asp-validation-for="Input.AcademicYear" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.YearLevel" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.YearLevel" class="form-control" />
+                                        <span asp-validation-for="Input.YearLevel" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.School" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.School" class="form-control" />
+                                        <span asp-validation-for="Input.School" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.FirstChoice" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.FirstChoice" class="form-control" />
+                                        <span asp-validation-for="Input.FirstChoice" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.SecondChoice" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.SecondChoice" class="form-control" />
+                                        <span asp-validation-for="Input.SecondChoice" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.ExpectedGradDate" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.ExpectedGradDate" class="form-control" />
+                                        <span asp-validation-for="Input.ExpectedGradDate" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.TermsRemaining" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.TermsRemaining" class="form-control" type="number" min="0" />
+                                        <span asp-validation-for="Input.TermsRemaining" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <div class="form-check">
+                                            <input asp-for="Input.IsScholar" class="form-check-input" />
+                                            <label asp-for="Input.IsScholar" class="form-check-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="signup-panel d-none" data-panel="3">
+                                <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Submission</h2>
+                                <div class="row">
+                                    <div class="col-12 mb-4">
+                                        <label asp-for="Input.Resume" class="form-label fw-semibold"></label>
+                                        <input asp-for="Input.Resume" class="form-control" placeholder="Link to your resume (optional)" />
+                                        <span asp-validation-for="Input.Resume" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Review Your Application</h2>
+                                <div class="signup-summary-card">
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-5">Username</dt>
+                                        <dd class="col-sm-7" id="summary-username">&mdash;</dd>
+
+                                        <dt class="col-sm-5">Email</dt>
+                                        <dd class="col-sm-7" id="summary-email">&mdash;</dd>
+
+                                        <dt class="col-sm-5">Full Name</dt>
+                                        <dd class="col-sm-7" id="summary-fullname">&mdash;</dd>
+
+                                        <dt class="col-sm-5">Student No.</dt>
+                                        <dd class="col-sm-7" id="summary-studentno">&mdash;</dd>
+
+                                        <dt class="col-sm-5">Academic Year</dt>
+                                        <dd class="col-sm-7" id="summary-academicyear">&mdash;</dd>
+
+                                        <dt class="col-sm-5">Year Level</dt>
+                                        <dd class="col-sm-7" id="summary-yearlevel">&mdash;</dd>
+
+                                        <dt class="col-sm-5">School</dt>
+                                        <dd class="col-sm-7" id="summary-school">&mdash;</dd>
+
+                                        <dt class="col-sm-5">First Choice</dt>
+                                        <dd class="col-sm-7" id="summary-firstchoice">&mdash;</dd>
+
+                                        <dt class="col-sm-5">Second Choice</dt>
+                                        <dd class="col-sm-7" id="summary-secondchoice">&mdash;</dd>
+
+                                        <dt class="col-sm-5">Scholar</dt>
+                                        <dd class="col-sm-7" id="summary-scholar">&mdash;</dd>
+                                    </dl>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center mt-4">
+                                <button type="button" class="btn btn-outline-secondary px-4 signup-prev d-none">
+                                    <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Back
+                                </button>
+                                <button type="button" class="btn btn-dark px-4 ms-auto signup-next">
+                                    Next <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+                                </button>
+                                <button type="submit" class="btn btn-primary px-4 ms-auto d-none signup-submit">
+                                    <i class="bi bi-send-check me-1" aria-hidden="true"></i> Submit Application
+                                </button>
+                            </div>
+
+                            <p class="text-center text-muted small mt-4 mb-0">
+                                Already have an account? <a asp-page="/Login">Login</a>
+                            </p>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.AcademicYear" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.AcademicYear" class="form-control" placeholder="e.g. 2026-2027" />
-                            <span asp-validation-for="Input.AcademicYear" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.FirstName" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.FirstName" class="form-control" />
-                            <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.LastName" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.LastName" class="form-control" />
-                            <span asp-validation-for="Input.LastName" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.YearLevel" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.YearLevel" class="form-control" />
-                            <span asp-validation-for="Input.YearLevel" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.School" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.School" class="form-control" />
-                            <span asp-validation-for="Input.School" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.FirstChoice" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.FirstChoice" class="form-control" />
-                            <span asp-validation-for="Input.FirstChoice" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.SecondChoice" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.SecondChoice" class="form-control" />
-                            <span asp-validation-for="Input.SecondChoice" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.ExpectedGradDate" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.ExpectedGradDate" class="form-control" />
-                            <span asp-validation-for="Input.ExpectedGradDate" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.TermsRemaining" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.TermsRemaining" class="form-control" type="number" min="0" />
-                            <span asp-validation-for="Input.TermsRemaining" class="text-danger small"></span>
-                        </div>
-                        <div class="col-12 mb-3">
-                            <label asp-for="Input.Resume" class="form-label fw-semibold"></label>
-                            <input asp-for="Input.Resume" class="form-control" placeholder="Link to your resume (optional)" />
-                            <span asp-validation-for="Input.Resume" class="text-danger small"></span>
-                        </div>
-                        <div class="col-12 mb-4">
-                            <div class="form-check">
-                                <input asp-for="Input.IsScholar" class="form-check-input" />
-                                <label asp-for="Input.IsScholar" class="form-check-label"></label>
+
+                        <div class="col-lg-4 signup-guidelines p-4 p-md-5 border-start">
+                            <div class="signup-guideline-panel" data-guideline="1">
+                                <h2 class="h6 fw-bold mb-3"><i class="bi bi-info-circle me-1" aria-hidden="true"></i> General Guidelines</h2>
+                                <ul class="signup-guideline-list">
+                                    <li>Choose a username that's 3&ndash;50 characters long &mdash; you'll use it to log in.</li>
+                                    <li>Use a personal email address you check regularly; we'll send updates about your application there.</li>
+                                    <li>Your password must be at least 6 characters long.</li>
+                                    <li>Enter your legal first and last name as they appear on your school records.</li>
+                                </ul>
+                            </div>
+                            <div class="signup-guideline-panel d-none" data-guideline="2">
+                                <h2 class="h6 fw-bold mb-3"><i class="bi bi-mortarboard me-1" aria-hidden="true"></i> Academic Guidelines</h2>
+                                <ul class="signup-guideline-list">
+                                    <li>Enter your official student number exactly as issued by the school.</li>
+                                    <li>Academic year should follow the format <strong>2026-2027</strong>.</li>
+                                    <li>List your first and second department or publication choices in order of preference.</li>
+                                    <li>Check "I am a scholar" if you're currently receiving a scholarship &mdash; this may affect priority review.</li>
+                                </ul>
+                            </div>
+                            <div class="signup-guideline-panel d-none" data-guideline="3">
+                                <h2 class="h6 fw-bold mb-3"><i class="bi bi-send-check me-1" aria-hidden="true"></i> Before You Submit</h2>
+                                <ul class="signup-guideline-list">
+                                    <li>A resume link is optional but recommended to strengthen your application.</li>
+                                    <li>Review the summary carefully &mdash; you won't be able to edit these details once submitted.</li>
+                                    <li>Click <strong>Submit Application</strong> to create your account and send your application for review.</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
-
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
-                        <i class="bi bi-send-check me-1" aria-hidden="true"></i> Submit Application
-                    </button>
-
-                    <p class="text-center text-muted small mt-3 mb-0">
-                        Already have an account? <a asp-page="/Login">Login</a>
-                    </p>
                 </form>
             </div>
         </div>
@@ -147,5 +248,87 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var totalSteps = 3;
+            var current = 1;
+            var steps = document.querySelectorAll('.signup-step');
+            var panels = document.querySelectorAll('.signup-panel');
+            var guidelines = document.querySelectorAll('.signup-guideline-panel');
+            var nextBtn = document.querySelector('.signup-next');
+            var prevBtn = document.querySelector('.signup-prev');
+            var submitBtn = document.querySelector('.signup-submit');
+
+            function showStep(step) {
+                panels.forEach(function (p) { p.classList.toggle('d-none', Number(p.dataset.panel) !== step); });
+                guidelines.forEach(function (g) { g.classList.toggle('d-none', Number(g.dataset.guideline) !== step); });
+                steps.forEach(function (s) {
+                    var n = Number(s.dataset.step);
+                    s.classList.toggle('active', n === step);
+                    s.classList.toggle('completed', n < step);
+                });
+                prevBtn.classList.toggle('d-none', step === 1);
+                nextBtn.classList.toggle('d-none', step === totalSteps);
+                submitBtn.classList.toggle('d-none', step !== totalSteps);
+                current = step;
+                if (step === totalSteps) {
+                    updateSummary();
+                }
+                document.querySelector('.signup-wizard-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            function validateStep(step) {
+                var panel = document.querySelector('.signup-panel[data-panel="' + step + '"]');
+                var valid = true;
+                panel.querySelectorAll('input, select, textarea').forEach(function (input) {
+                    if (window.jQuery && window.jQuery(input).valid) {
+                        if (!window.jQuery(input).valid()) {
+                            valid = false;
+                        }
+                    } else if (!input.checkValidity()) {
+                        input.reportValidity();
+                        valid = false;
+                    }
+                });
+                return valid;
+            }
+
+            function fieldValue(id) {
+                var el = document.getElementById(id);
+                return el ? el.value : '';
+            }
+
+            function updateSummary() {
+                document.getElementById('summary-username').textContent = fieldValue('Input_UserName') || '—';
+                document.getElementById('summary-email').textContent = fieldValue('Input_Email') || '—';
+                var fullName = (fieldValue('Input_FirstName') + ' ' + fieldValue('Input_LastName')).trim();
+                document.getElementById('summary-fullname').textContent = fullName || '—';
+                document.getElementById('summary-studentno').textContent = fieldValue('Input_StudentNo') || '—';
+                document.getElementById('summary-academicyear').textContent = fieldValue('Input_AcademicYear') || '—';
+                document.getElementById('summary-yearlevel').textContent = fieldValue('Input_YearLevel') || '—';
+                document.getElementById('summary-school').textContent = fieldValue('Input_School') || '—';
+                document.getElementById('summary-firstchoice').textContent = fieldValue('Input_FirstChoice') || '—';
+                document.getElementById('summary-secondchoice').textContent = fieldValue('Input_SecondChoice') || '—';
+                var scholarEl = document.getElementById('Input_IsScholar');
+                document.getElementById('summary-scholar').textContent = (scholarEl && scholarEl.checked) ? 'Yes' : 'No';
+            }
+
+            nextBtn.addEventListener('click', function () {
+                if (!validateStep(current)) return;
+                if (current < totalSteps) showStep(current + 1);
+            });
+
+            prevBtn.addEventListener('click', function () {
+                if (current > 1) showStep(current - 1);
+            });
+
+            steps.forEach(function (stepEl) {
+                stepEl.addEventListener('click', function () {
+                    var target = Number(stepEl.dataset.step);
+                    if (target < current) showStep(target);
+                });
+            });
+        })();
+    </script>
 </body>
 </html>

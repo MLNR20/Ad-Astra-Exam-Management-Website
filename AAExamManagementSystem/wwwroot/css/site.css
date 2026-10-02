@@ -293,6 +293,84 @@ header .navbar {
   width: auto;
 }
 
+/* Signup wizard */
+.signup-wizard-card {
+  max-width: 1040px;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.signup-steps {
+  flex-wrap: wrap;
+}
+
+.signup-step {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: #9a988f;
+  font-weight: 600;
+  cursor: default;
+}
+
+.signup-step.completed {
+  cursor: pointer;
+}
+
+.signup-step-circle {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid #d8d6cf;
+  font-size: .85rem;
+}
+
+.signup-step.active,
+.signup-step.completed {
+  color: #1c1c1c;
+}
+
+.signup-step.active .signup-step-circle {
+  border-color: #1b6ec2;
+  background-color: #1b6ec2;
+  color: #fff;
+}
+
+.signup-step.completed .signup-step-circle {
+  border-color: #1c1c1c;
+  background-color: #1c1c1c;
+  color: #fff;
+}
+
+.signup-guidelines {
+  background-color: #faf9f6;
+}
+
+.signup-guideline-list {
+  padding-left: 1.1rem;
+  color: #52514e;
+}
+
+.signup-guideline-list li {
+  margin-bottom: .75rem;
+}
+
+.signup-summary-card {
+  background-color: #faf9f6;
+  border: 1px solid #e9e8e4;
+  border-radius: .75rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.signup-summary-card dt {
+  color: #9a988f;
+  font-weight: 600;
+}
+
 /* Analytics page */
 .stat-tile,
 .chart-card {
