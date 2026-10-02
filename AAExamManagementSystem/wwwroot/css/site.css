@@ -244,6 +244,28 @@ header .navbar {
 .dataTables_wrapper .dataTables_filter {
   font-size: 1.12rem;
 }
+/* Landing page */
+.hero-banner {
+  position: relative;
+  background-image: linear-gradient(180deg, rgba(10, 10, 10, .55), rgba(10, 10, 10, .85)), url('/images/hero-students.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.reminder-number {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #1c1c1c;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
 /* Login page */
 .login-card {
   max-width: 420px;
@@ -369,13 +391,7 @@ header .navbar {
 .adastra-footer-social {
   display: flex;
   gap: .6rem;
-  justify-content: center;
-}
-
-@media (min-width: 992px) {
-  .adastra-footer-social {
-    justify-content: flex-start;
-  }
+  justify-content: flex-start;
 }
 
 .adastra-footer-icon {

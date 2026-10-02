@@ -1,19 +1,120 @@
 @page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    Layout = null;
 }
-
-<div class="row g-4 align-items-stretch">
-    <div class="col-12">
-        <div class="bg-black text-white rounded-4 p-5 h-100 d-flex flex-column justify-content-center gap-4">
-            <div>
-                <span class="d-block fs-5 fw-normal text-white-50 mb-1">Welcome to</span>
-                <h1 class="display-6 fw-bold mb-0">Ad Astra Exam Management System</h1>
-            </div>
-            <div>
-                <p class="text-white-50 mb-0 hero-tagline fs-5">Where great staff meet their next big opportunity.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ad Astra Exam Management System</title>
+    <link rel="icon" type="image/png" href="~/images/adastra-mark.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-light bg-white shadow-sm mb-0">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <a asp-page="/Index" class="navbar-brand d-flex align-items-center gap-2 mb-0">
+                <img src="~/images/adastra-mark.png" alt="" class="signup-navbar-mark" />
+                <span class="fw-semibold">AD ASTRA</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a asp-page="/Signup" class="btn btn-outline-dark btn-sm fw-semibold">Apply Now</a>
+                <a asp-page="/Login" class="btn btn-dark btn-sm fw-semibold">Login</a>
             </div>
         </div>
-    </div>
-</div>
+    </nav>
+
+    <main class="flex-grow-1">
+        <section class="hero-banner text-white p-5">
+            <div class="container-fluid py-4">
+                <span class="d-block fs-5 fw-normal text-white-50 mb-1">Welcome to</span>
+                <h1 class="display-5 fw-bold mb-3">Ad Astra Exam Management System</h1>
+                <p class="text-white-50 fs-5 mb-4">Where great staff meet their next big opportunity.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-page="/Signup" class="btn btn-light btn-lg fw-semibold">Apply as a Candidate</a>
+                    <a asp-page="/Login" class="btn btn-outline-light btn-lg fw-semibold">Staff Login</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="container-fluid p-5">
+            <div class="text-center mb-4">
+                <span class="d-inline-block bg-dark text-white rounded-pill px-5 py-3 fw-bold fs-3 mb-4">About Ad Astra</span>
+            </div>
+            <div class="mx-auto" style="max-width: 900px;">
+                <p class="text-muted fs-5 text-center">
+                    Ad Astra is De La Salle-College of Saint Benilde's (DLS-CSB) official student organization tasked to produce the College yearbook, capturing in text and images the graduating batches&rsquo; dreams and aspirations, momentous events in school, various curricular and extracurricular activities, including messages from their administrators and mentors.
+                </p>
+                <p class="text-muted fs-5 text-center mb-0">
+                    Ad Astra currently has three major publications produced every academic year:
+                </p>
+            </div>
+        </section>
+
+        <section class="container-fluid p-5">
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <i class="bi bi-mortarboard display-5 mb-3" aria-hidden="true"></i>
+                    <h5 class="fw-bold">For Applicants</h5>
+                    <p class="text-muted">Submit your application and take your qualifying exam online, anytime.</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="bi bi-clipboard-check display-5 mb-3" aria-hidden="true"></i>
+                    <h5 class="fw-bold">For Staff</h5>
+                    <p class="text-muted">Manage departments, courses, questions, and review exam attempts with ease.</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="bi bi-bar-chart-line display-5 mb-3" aria-hidden="true"></i>
+                    <h5 class="fw-bold">Insightful Analytics</h5>
+                    <p class="text-muted">Track performance and outcomes with real-time dashboards.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="container-fluid p-5">
+            <div class="text-center mb-5">
+                <span class="d-inline-block bg-dark text-white rounded-pill px-5 py-3 fw-bold text-uppercase fs-3 mb-3">General Exam Reminders</span>
+                <p class="text-muted fs-5 mb-0">Take note of the following reminders before proceeding with the exam.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 border rounded-4">
+                        <div class="card-body text-center p-4">
+                            <span class="reminder-number mx-auto mb-3">1</span>
+                            <p class="mb-0">Read all of the questions first before answering.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border rounded-4">
+                        <div class="card-body text-center p-4">
+                            <span class="reminder-number mx-auto mb-3">2</span>
+                            <p class="mb-0">Keep your essay answers short and concise. It is better to write a short response that hits the point of the question than a long essay that talks about something else.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border rounded-4">
+                        <div class="card-body text-center p-4">
+                            <span class="reminder-number mx-auto mb-3">3</span>
+                            <p class="mb-0">Once you exceed past the allotted time for taking your exam, your submission will automatically be marked as &ldquo;late&rdquo;, so make sure to submit your answers on time.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    @await Html.PartialAsync("_AdAstraFooter")
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

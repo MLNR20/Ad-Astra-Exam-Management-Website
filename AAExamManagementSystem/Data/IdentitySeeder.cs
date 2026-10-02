@@ -13,7 +13,7 @@ public static class IdentitySeeder
 
     private static readonly (string Name, string Url, string Icon, string Category, int DisplayOrder)[] WebPages =
     {
-        ("Dashboard", "/Index", "bi-grid-1x2", "Overview", 0),
+        ("Dashboard", "/Dashboard", "bi-grid-1x2", "Overview", 0),
         ("Applicant Portal", "/ApplicantPortal", "bi-mortarboard", "Overview", 1),
         ("Analytics", "/Analytics/Index", "bi-bar-chart-line", "Overview", 2),
         ("Departments", "/Departments/Index", "bi-building", "Academics", 3),

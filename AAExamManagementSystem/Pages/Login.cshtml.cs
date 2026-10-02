@@ -68,7 +68,7 @@ namespace AAExamManagementSystem.Pages
                     return RedirectToPage("/ApplicantPortal");
                 }
 
-                return RedirectToPage("/Index");
+                return RedirectToPage("/Dashboard");
             }
 
             if (result.IsLockedOut)
