@@ -45,6 +45,9 @@
                         <div class="input-group">
                             <span class="input-group-text bg-white"><i class="bi bi-lock" aria-hidden="true"></i></span>
                             <input asp-for="Input.Password" class="form-control" autocomplete="current-password" />
+                            <button type="button" class="btn btn-outline-secondary toggle-password" data-target="Input_Password" aria-label="Show password">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
                         </div>
                         <span asp-validation-for="Input.Password" class="text-danger small"></span>
                     </div>
@@ -72,5 +75,18 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll('.toggle-password').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var input = document.getElementById(btn.dataset.target);
+                var icon = btn.querySelector('i');
+                var isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                icon.classList.toggle('bi-eye', !isHidden);
+                icon.classList.toggle('bi-eye-slash', isHidden);
+                btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+            });
+        });
+    </script>
 </body>
 </html>
