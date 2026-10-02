@@ -266,6 +266,11 @@ header .navbar {
   max-width: 720px;
 }
 
+.signup-navbar-mark {
+  height: 28px;
+  width: auto;
+}
+
 /* Analytics page */
 .stat-tile,
 .chart-card {
@@ -369,7 +374,7 @@ header .navbar {
 
 @media (min-width: 992px) {
   .adastra-footer-social {
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 }
 

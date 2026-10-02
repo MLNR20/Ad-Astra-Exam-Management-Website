@@ -9,6 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Applicant Registration - Exam Management System</title>
+    <link rel="icon" type="image/png" href="~/images/adastra-mark.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" />
@@ -16,8 +17,17 @@
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="bg-light">
-    <main class="login-page d-flex align-items-center justify-content-center min-vh-100 p-3">
+<body class="bg-light d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-light bg-white shadow-sm mb-0">
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <a asp-page="/Index" class="navbar-brand d-flex align-items-center gap-2 mb-0">
+                <img src="~/images/adastra-mark.png" alt="" class="signup-navbar-mark" />
+                <span class="fw-semibold">AD ASTRA</span>
+            </a>
+            <a asp-page="/Login" class="btn btn-dark btn-sm fw-semibold">Login</a>
+        </div>
+    </nav>
+    <main class="login-page d-flex align-items-center justify-content-center flex-grow-1 p-3">
         <div class="card login-card signup-card border-0 shadow-sm w-100">
             <div class="card-body p-4 p-md-5">
                 <div class="text-center mb-4">
@@ -131,6 +141,8 @@
             </div>
         </div>
     </main>
+
+    @await Html.PartialAsync("_AdAstraFooter")
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
