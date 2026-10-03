@@ -1,0 +1,87 @@
+@page
+@model AAExamManagementSystem.Pages.Announcements.IndexModel
+@{
+    ViewData["Title"] = "Announcements";
+}
+
+@await Component.InvokeAsync("EntityTable", new
+{
+    tableId = "announcementsTable",
+    basePath = "/Announcements",
+    emptyMessage = "No announcements found.",
+    items = Model.Announcements.Select(a => new EntityTableRow(a.Id.ToString(), a.Title, a.IsActive, a.CreatedAt, DateUpdated: a.DateUpdated)),
+    title = "Announcements",
+    titleClass = "fw-semibold",
+    addButtonText = "New Announcement",
+    addButtonModalTarget = "#createAnnouncementModal",
+    showStatusColumn = true,
+    showDateCreatedColumn = true,
+    showDateUpdatedColumn = true,
+    confirmDeleteWithSweetAlert = true,
+    confirmCreateWithSweetAlert = true,
+    entityName = "Announcement",
+    useSoftDelete = true
+})
+
+<div class="modal fade" id="createAnnouncementModal" tabindex="-1" aria-labelledby="createAnnouncementModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Create" class="js-sweetalert-create-form">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createAnnouncementModalLabel">New Announcement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-3">
+                        <label asp-for="NewAnnouncement.Title" class="form-label"></label>
+                        <input asp-for="NewAnnouncement.Title" class="form-control" />
+                        <span asp-validation-for="NewAnnouncement.Title" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="NewAnnouncement.Subheader" class="form-label"></label>
+                        <input asp-for="NewAnnouncement.Subheader" class="form-control" />
+                        <span asp-validation-for="NewAnnouncement.Subheader" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="NewAnnouncement.Body" class="form-label"></label>
+                        <textarea asp-for="NewAnnouncement.Body" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="NewAnnouncement.Body" class="text-danger"></span>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input asp-for="NewAnnouncement.IsActive" class="form-check-input" role="switch" />
+                        <label asp-for="NewAnnouncement.IsActive" class="form-check-label"></label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="~/js/sweetalert-toast.js" asp-append-version="true"></script>
+    <partial name="_SuccessToast" />
+    <script>
+        $(function () {
+            if ($('#announcementsTable').length) {
+                initEntityTable('announcementsTable');
+            }
+            @if (Model.ShowCreateModal)
+            {
+                <text>new bootstrap.Modal(document.getElementById('createAnnouncementModal')).show();</text>
+            }
+        });
+    </script>
+}

@@ -34,14 +34,26 @@
     <main class="flex-grow-1">
         <section class="hero-banner text-white p-5">
             <div class="container-fluid py-4">
-                <span class="d-block fs-5 fw-normal text-white-50 mb-1">Welcome to</span>
+                <span class="d-block fs-4 fw-normal text-white-50 mb-1">Welcome to</span>
                 <h1 class="display-5 fw-bold mb-3">Ad Astra Exam Management System</h1>
-                <p class="text-white-50 fs-5 mb-4">Where great staff meet their next big opportunity.</p>
-                <div class="d-flex flex-wrap gap-2">
+                <p class="text-white-50 fs-4 mb-4">Where great staff meet their next big opportunity.</p>
+                <div class="d-flex flex-wrap justify-content-center gap-2">
                     <a asp-page="/Signup" class="btn btn-light btn-lg fw-semibold">Apply as a Candidate</a>
                 </div>
             </div>
         </section>
+
+        @if (Model.LatestAnnouncement is not null)
+        {
+            <section class="hero-footer-bar d-flex flex-column align-items-start justify-content-between text-start text-white p-4">
+                <span class="hero-footer-title fw-bold">@Model.LatestAnnouncement.Title</span>
+                <span class="hero-footer-subheader text-white-50">@Model.LatestAnnouncement.Subheader</span>
+            </section>
+        }
+        else
+        {
+            <section class="hero-footer-bar" aria-hidden="true"></section>
+        }
 
         <section class="container-fluid p-5">
             <div class="text-center mb-4">

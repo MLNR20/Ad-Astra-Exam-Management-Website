@@ -11,6 +11,9 @@ public class MappingProfile : Profile
         CreateMap<Department, DepartmentDto>();
         CreateMap<DepartmentCreateUpdateDto, Department>();
 
+        CreateMap<Announcement, AnnouncementDto>();
+        CreateMap<AnnouncementCreateUpdateDto, Announcement>();
+
         CreateMap<Course, CourseDto>();
         CreateMap<CourseCreateUpdateDto, Course>();
 

@@ -23,7 +23,8 @@ public static class IdentitySeeder
         ("Users", "/Users/Index", "bi-people", "Administration", 7),
         ("Roles", "/Roles/Index", "bi-person-badge", "Administration", 8),
         ("Role Assignments", "/RoleAssignments/Index", "bi-person-check", "Administration", 9),
-        ("Audit Logs", "/AuditLogs/Index", "bi-clipboard-data", "Administration", 10)
+        ("Audit Logs", "/AuditLogs/Index", "bi-clipboard-data", "Administration", 10),
+        ("Announcements", "/Announcements/Index", "bi-megaphone", "Academics", 11)
     };
 
     public static async Task SeedAsync(IServiceProvider services)

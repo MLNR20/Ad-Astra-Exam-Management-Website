@@ -1,4 +1,5 @@
 using AAExamManagementSystem.Models.Entities;
+using AAExamManagementSystem.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -8,11 +9,15 @@ namespace AAExamManagementSystem.Pages
     public class IndexModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IGenericRepository<Announcement> _announcementRepository;
 
-        public IndexModel(UserManager<ApplicationUser> userManager)
+        public IndexModel(UserManager<ApplicationUser> userManager, IGenericRepository<Announcement> announcementRepository)
         {
             _userManager = userManager;
+            _announcementRepository = announcementRepository;
         }
+
+        public Announcement? LatestAnnouncement { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -26,6 +31,12 @@ namespace AAExamManagementSystem.Pages
 
                 return RedirectToPage("/Dashboard");
             }
+
+            var announcements = await _announcementRepository.GetAllAsync();
+            LatestAnnouncement = announcements
+                .Where(a => a.IsActive)
+                .OrderByDescending(a => a.CreatedAt)
+                .FirstOrDefault();
 
             return Page();
         }

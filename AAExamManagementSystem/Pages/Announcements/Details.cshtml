@@ -1,0 +1,23 @@
+@page "{id:guid}"
+@model AAExamManagementSystem.Pages.Announcements.DetailsModel
+@{
+    ViewData["Title"] = "Announcement Details";
+}
+
+@await Component.InvokeAsync("DetailsCard", new
+{
+    title = "Announcement Details",
+    fields = new[]
+    {
+        new DetailsField("Id", Model.Announcement.Id.ToString()),
+        new DetailsField("Title", Model.Announcement.Title),
+        new DetailsField("Subheader", Model.Announcement.Subheader),
+        new DetailsField("Body", Model.Announcement.Body),
+        new DetailsField("Date Created", Model.Announcement.CreatedAt.ToString("MMM d, yyyy")),
+        new DetailsField("Date Updated", Model.Announcement.DateUpdated.ToString("MMM d, yyyy"))
+    },
+    showStatus = true,
+    isActive = Model.Announcement.IsActive,
+    editHref = $"/Announcements/Edit/{Model.Announcement.Id}",
+    backHref = "/Announcements"
+})
