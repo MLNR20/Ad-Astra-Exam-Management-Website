@@ -4,6 +4,7 @@ using AAExamManagementSystem.Repository;
 using AAExamManagementSystem.Services;
 using Asp.Versioning;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AAExamManagementSystem.Controllers;
@@ -11,6 +12,7 @@ namespace AAExamManagementSystem.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[Authorize]
 public class QuestionsController : ControllerBase
 {
     private readonly IGenericRepository<Question> _repository;

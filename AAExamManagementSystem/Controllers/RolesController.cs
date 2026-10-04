@@ -2,6 +2,7 @@ using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
 using Asp.Versioning;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace AAExamManagementSystem.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[Authorize]
 public class RolesController : ControllerBase
 {
     private readonly RoleManager<ApplicationRole> _roleManager;

@@ -17,7 +17,7 @@ namespace AAExamManagementSystem.Pages
             _announcementRepository = announcementRepository;
         }
 
-        public Announcement? LatestAnnouncement { get; set; }
+        public List<Announcement> Announcements { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -33,10 +33,10 @@ namespace AAExamManagementSystem.Pages
             }
 
             var announcements = await _announcementRepository.GetAllAsync();
-            LatestAnnouncement = announcements
+            Announcements = announcements
                 .Where(a => a.IsActive)
                 .OrderByDescending(a => a.CreatedAt)
-                .FirstOrDefault();
+                .ToList();
 
             return Page();
         }

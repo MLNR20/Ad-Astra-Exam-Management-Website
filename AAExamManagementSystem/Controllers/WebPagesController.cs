@@ -2,6 +2,7 @@ using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Repository;
 using Asp.Versioning;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ namespace AAExamManagementSystem.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[Authorize]
 public class WebPagesController : ControllerBase
 {
     private readonly ApplicationDbContext _context;

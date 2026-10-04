@@ -18,8 +18,8 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-light bg-white shadow-sm mb-0">
-        <div class="container-fluid d-flex align-items-center justify-content-between">
+    <nav class="navbar navbar-light bg-white shadow-sm mb-0 site-navbar">
+        <div class="container-fluid d-flex align-items-center justify-content-between px-5">
             <a asp-page="/Index" class="navbar-brand d-flex align-items-center gap-2 mb-0">
                 <img src="~/images/adastra-mark.png" alt="" class="signup-navbar-mark" />
                 <span class="fw-semibold">AD ASTRA</span>
@@ -35,7 +35,7 @@
         <section class="hero-banner text-white p-5">
             <div class="container-fluid py-4">
                 <span class="d-block fs-4 fw-normal text-white-50 mb-1">Welcome to</span>
-                <h1 class="display-5 fw-bold mb-3">Ad Astra Exam Management System</h1>
+                <h1 class="display-5 fw-bold mb-3">Ad Astra Recruitment Portal</h1>
                 <p class="text-white-50 fs-4 mb-4">Where great staff meet their next big opportunity.</p>
                 <div class="d-flex flex-wrap justify-content-center gap-2">
                     <a asp-page="/Signup" class="btn btn-light btn-lg fw-semibold">Apply as a Candidate</a>
@@ -43,11 +43,25 @@
             </div>
         </section>
 
-        @if (Model.LatestAnnouncement is not null)
+        @if (Model.Announcements.Count > 0)
         {
-            <section class="hero-footer-bar d-flex flex-column align-items-start justify-content-between text-start text-white p-4">
-                <span class="hero-footer-title fw-bold">@Model.LatestAnnouncement.Title</span>
-                <span class="hero-footer-subheader text-white-50">@Model.LatestAnnouncement.Subheader</span>
+            <section class="hero-footer-bar position-relative d-flex align-items-center text-start text-white px-5" id="announcementCarousel" data-interval="6000">
+                <div class="flex-grow-1">
+                    @for (var i = 0; i < Model.Announcements.Count; i++)
+                    {
+                        var announcement = Model.Announcements[i];
+                        <div class="announcement-slide d-flex flex-column @(i == 0 ? "" : "d-none")" data-index="@i">
+                            <span class="hero-footer-title fw-bold">@announcement.Title</span>
+                            <span class="hero-footer-subheader text-white-50">@announcement.Subheader</span>
+                        </div>
+                    }
+                </div>
+                @if (Model.Announcements.Count > 1)
+                {
+                    <button type="button" class="btn btn-outline-light btn-sm rounded-circle announcement-next-btn flex-shrink-0 d-flex align-items-center justify-content-center" aria-label="Next announcement">
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </button>
+                }
             </section>
         }
         else
@@ -55,13 +69,13 @@
             <section class="hero-footer-bar" aria-hidden="true"></section>
         }
 
-        <section class="container-fluid p-5">
-            <div class="text-center mb-4">
+        <section class="container-fluid p-5 about-section">
+            <div class="text-start mb-4">
                 <span class="d-inline-block bg-dark text-white rounded-pill px-5 py-3 fw-bold fs-3 mb-4">About Ad Astra</span>
             </div>
-            <div class="mx-auto" style="max-width: 900px;">
-                <p class="text-muted fs-5 text-center">
-                    Ad Astra is De La Salle-College of Saint Benilde's (DLS-CSB) official student organization tasked to produce the College yearbook, capturing in text and images the graduating batches&rsquo; dreams and aspirations, momentous events in school, various curricular and extracurricular activities, including messages from their administrators and mentors.
+            <div style="max-width: 900px;">
+                <p class="text-muted fs-5 text-start">
+                    Ad Astra is DLS-CSB&rsquo;s official student organization tasked to produce the College yearbook. As a yearbook organization, Ad Astra aims to tell authentic stories and capture timeless memories and experiences. Ad Astra also strives to strengthen the College&rsquo;s identity by producing content about Benildeans, for Benildeans.
                 </p>
                 <p class="text-muted fs-5 text-center mb-0">
                     Ad Astra currently has three major publications produced every academic year:
@@ -127,5 +141,43 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            var carousel = document.getElementById('announcementCarousel');
+            if (!carousel) return;
+
+            var slides = carousel.querySelectorAll('.announcement-slide');
+            if (slides.length < 2) return;
+
+            var intervalMs = parseInt(carousel.dataset.interval, 10) || 6000;
+            var currentIndex = 0;
+            var timer;
+
+            function showSlide(index) {
+                slides[currentIndex].classList.add('d-none');
+                currentIndex = (index + slides.length) % slides.length;
+                slides[currentIndex].classList.remove('d-none');
+            }
+
+            function goToNext() {
+                showSlide(currentIndex + 1);
+            }
+
+            function resetTimer() {
+                clearInterval(timer);
+                timer = setInterval(goToNext, intervalMs);
+            }
+
+            var nextBtn = carousel.querySelector('.announcement-next-btn');
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function () {
+                    goToNext();
+                    resetTimer();
+                });
+            }
+
+            resetTimer();
+        })();
+    </script>
 </body>
 </html>
