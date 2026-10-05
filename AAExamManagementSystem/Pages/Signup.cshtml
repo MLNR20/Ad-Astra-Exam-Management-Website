@@ -29,15 +29,12 @@
     </nav>
     <main class="login-page d-flex align-items-center justify-content-center flex-grow-1 p-3">
         <div class="signup-wizard-wrapper w-100">
-            <div class="text-center p-4 p-md-5 pb-3">
-                <div class="login-logo mx-auto mb-3">
-                    <i class="bi bi-person-plus" aria-hidden="true"></i>
-                </div>
+            <div class="text-start p-2 p-md-3 pb-1">
                 <h1 class="h4 fw-bold mb-1">Applicant Registration</h1>
                 <p class="text-muted mb-0">Create your account and submit your application</p>
             </div>
 
-            <div class="signup-steps d-flex justify-content-center gap-3 gap-md-5 pb-4">
+            <div class="signup-steps d-flex justify-content-start gap-3 gap-md-5 pb-2 px-2 px-md-3">
                 <div class="signup-step active" data-step="1">
                     <span class="signup-step-circle">1</span>
                     <span class="signup-step-label">General</span>
@@ -52,13 +49,13 @@
                 </div>
             </div>
 
-            <div class="card signup-wizard-card border-0 shadow-sm w-100">
-                <div class="card-body p-0">
+            <div class="signup-wizard-card w-100">
+                <div>
                 <form method="post" id="signupForm" novalidate>
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mx-4 mx-md-5" role="alert"></div>
 
                     <div class="row g-0 border-top">
-                        <div class="col-lg-8 p-4 p-md-5">
+                        <div class="col-lg-8 p-2 p-md-3">
                             <div class="signup-panel" data-panel="1">
                                 <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Account Information</h2>
                                 <div class="row">
@@ -210,7 +207,7 @@
                             </p>
                         </div>
 
-                        <div class="col-lg-4 signup-guidelines p-4 p-md-5 border-start">
+                        <div class="col-lg-4 signup-guidelines p-2 p-md-3 border-start">
                             <div class="signup-guideline-panel" data-guideline="1">
                                 <h2 class="h6 fw-bold mb-3"><i class="bi bi-info-circle me-1" aria-hidden="true"></i> General Guidelines</h2>
                                 <ul class="signup-guideline-list">

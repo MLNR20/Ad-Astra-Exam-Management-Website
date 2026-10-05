@@ -285,6 +285,19 @@ header .navbar {
   background-color: #eceeef;
 }
 
+.after-exam-step {
+  padding-top: 5rem !important;
+  padding-bottom: 5rem !important;
+}
+
+.after-exam-header {
+  background-color: #353535;
+}
+
+.fw-extrabold {
+  font-weight: 800 !important;
+}
+
 .announcement-next-btn {
   width: 2.5rem;
   height: 2.5rem;
@@ -338,6 +351,10 @@ header .navbar {
 .signup-wizard-card {
   border-radius: 1rem;
   overflow: hidden;
+}
+
+.signup-wizard-card .form-control {
+  border-color: #000;
 }
 
 .signup-steps {
@@ -488,11 +505,12 @@ header .navbar {
   letter-spacing: .08em;
   color: #fff;
   margin-bottom: .75rem;
+  font-size: 1.1rem;
 }
 
 .adastra-footer-text {
   color: #b8b8b8;
-  font-size: .9rem;
+  font-size: 1.1rem;
   line-height: 1.7;
 }
 
@@ -537,9 +555,9 @@ header .navbar {
 }
 
 .adastra-footer-copyright {
-  margin-top: 2rem;
+  margin-top: 2.2rem;
   padding-top: 1.25rem;
   border-top: 1px solid #3a3a3a;
   color: #9a9a9a;
-  font-size: .85rem;
+  font-size: .95rem;
 }
