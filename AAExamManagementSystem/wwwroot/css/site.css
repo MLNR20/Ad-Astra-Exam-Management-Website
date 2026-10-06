@@ -350,6 +350,7 @@ header .navbar {
 .signup-wizard-card {
   border-radius: 1rem;
   overflow: hidden;
+  min-height: 72vh;
 }
 
 .signup-wizard-card .form-control {
@@ -391,8 +392,8 @@ header .navbar {
 }
 
 .signup-step.active .signup-step-circle {
-  border-color: #1b6ec2;
-  background-color: #1b6ec2;
+  border-color: #1c1c1c;
+  background-color: #1c1c1c;
   color: #fff;
 }
 
