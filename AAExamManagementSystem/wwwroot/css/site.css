@@ -10,6 +10,15 @@ body {
   padding: 4rem !important;
 }
 
+.py-8 {
+  padding-top: 6rem !important;
+  padding-bottom: 6rem !important;
+}
+
+.pt-8 {
+  padding-top: 6rem !important;
+}
+
 @media (min-width: 768px) {
   html {
     font-size: 16px;
@@ -256,7 +265,7 @@ header .navbar {
 /* Landing page */
 .hero-banner {
   position: relative;
-  min-height: 56vh;
+  min-height: 68vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -269,15 +278,15 @@ header .navbar {
 
 .hero-footer-bar {
   background-color: #000;
-  min-height: 12vh;
+  min-height: 18vh;
 }
 
 .hero-footer-title {
-  font-size: 1.5rem;
+  font-size: 1.40rem;
 }
 
 .hero-footer-subheader {
-  font-size: 1.2rem;
+  font-size: 1.125rem;
 }
 
 .about-section {

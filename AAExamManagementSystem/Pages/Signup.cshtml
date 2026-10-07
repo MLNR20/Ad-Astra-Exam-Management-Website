@@ -18,8 +18,8 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-light bg-white shadow-sm mb-0">
-        <div class="container-fluid d-flex align-items-center justify-content-between">
+    <nav class="navbar navbar-light bg-white shadow-sm mb-0 site-navbar">
+        <div class="container-fluid d-flex align-items-center justify-content-between px-5">
             <a asp-page="/Index" class="navbar-brand d-flex align-items-center gap-2 mb-0">
                 <img src="~/images/adastra-mark.png" alt="" class="signup-navbar-mark" />
                 <span class="fw-semibold">AD ASTRA</span>
@@ -29,7 +29,7 @@
     </nav>
     <main class="login-page d-flex align-items-center justify-content-center flex-grow-1 p-3">
         <div class="signup-wizard-wrapper w-100">
-            <div class="text-start p-2 p-md-3 pb-1">
+            <div class="text-start px-2 px-md-3 pt-8 pb-1">
                 <h1 class="h4 fw-bold mb-1">Applicant Registration</h1>
                 <p class="text-muted mb-0">Create your account and submit your application</p>
             </div>
@@ -55,36 +55,36 @@
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mx-4 mx-md-5" role="alert"></div>
 
                     <div class="row g-0 border-top">
-                        <div class="col-lg-8 p-2 p-md-3">
+                        <div class="col-lg-8 px-2 px-md-3 py-8">
                             <div class="signup-panel" data-panel="1">
                                 <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Account Information</h2>
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.UserName" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.UserName" class="form-control" autocomplete="username" autofocus />
                                         <span asp-validation-for="Input.UserName" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.Email" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.Email" class="form-control" autocomplete="email" />
                                         <span asp-validation-for="Input.Email" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.Password" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
                                         <span asp-validation-for="Input.Password" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
                                         <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.FirstName" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.FirstName" class="form-control" />
                                         <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.LastName" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.LastName" class="form-control" />
                                         <span asp-validation-for="Input.LastName" class="text-danger small"></span>
@@ -207,7 +207,7 @@
                             </p>
                         </div>
 
-                        <div class="col-lg-4 signup-guidelines p-2 p-md-3 border-start">
+                        <div class="col-lg-4 signup-guidelines px-2 px-md-3 py-8 border-start">
                             <div class="signup-guideline-panel" data-guideline="1">
                                 <h2 class="h6 fw-bold mb-3"><i class="bi bi-info-circle me-1" aria-hidden="true"></i> General Guidelines</h2>
                                 <ul class="signup-guideline-list">
