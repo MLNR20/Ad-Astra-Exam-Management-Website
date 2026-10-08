@@ -16,6 +16,7 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/");
     options.Conventions.AllowAnonymousToPage("/Index");
     options.Conventions.AllowAnonymousToPage("/Login");
+    options.Conventions.AllowAnonymousToPage("/ApplicantLogin");
     options.Conventions.AllowAnonymousToPage("/Signup");
     options.Conventions.AllowAnonymousToPage("/ForgotPassword");
     options.Conventions.AllowAnonymousToPage("/ForgotPasswordConfirmation");

@@ -7,13 +7,13 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace AAExamManagementSystem.Pages
 {
-    public class LoginModel : PageModel
+    public class ApplicantLoginModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _db;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ApplicationDbContext db)
+        public ApplicantLoginModel(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ApplicationDbContext db)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -44,9 +44,9 @@ namespace AAExamManagementSystem.Pages
                 ? await _userManager.FindByEmailAsync(Input.UserName)
                 : await _userManager.FindByNameAsync(Input.UserName);
 
-            if (user is null)
+            if (user is null || !await _userManager.IsInRoleAsync(user, AAExamManagementSystem.Models.Entities.Roles.Applicant))
             {
-                await LogLoginAttemptAsync(null, Input.UserName, success: false, "User not found.");
+                await LogLoginAttemptAsync(null, Input.UserName, success: false, "User not found or not an applicant.");
                 ModelState.AddModelError(string.Empty, "Invalid username/email or password.");
                 return Page();
             }
@@ -56,22 +56,14 @@ namespace AAExamManagementSystem.Pages
 
             if (result.Succeeded)
             {
-                if (await _userManager.IsInRoleAsync(user, AAExamManagementSystem.Models.Entities.Roles.Applicant))
-                {
-                    await _signInManager.SignOutAsync();
-                    await LogLoginAttemptAsync(user, Input.UserName, success: false, "Applicant attempted staff login.");
-                    ModelState.AddModelError(string.Empty, "Applicants must sign in from the Applicant Login page.");
-                    return Page();
-                }
-
-                await LogLoginAttemptAsync(user, Input.UserName, success: true, "Login succeeded.");
+                await LogLoginAttemptAsync(user, Input.UserName, success: true, "Applicant login succeeded.");
 
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 {
                     return LocalRedirect(returnUrl);
                 }
 
-                return RedirectToPage("/Dashboard");
+                return RedirectToPage("/ApplicantPortal");
             }
 
             if (result.IsLockedOut)
@@ -94,8 +86,8 @@ namespace AAExamManagementSystem.Pages
             {
                 Type = "Login",
                 ResponseBody = success
-                    ? $"Login succeeded for '{user!.UserName}'."
-                    : $"Login failed for '{attemptedUserName}': {reason}",
+                    ? $"Applicant login succeeded for '{user!.UserName}'."
+                    : $"Applicant login failed for '{attemptedUserName}': {reason}",
                 IsActive = success,
                 CreatedById = user?.Id,
             };

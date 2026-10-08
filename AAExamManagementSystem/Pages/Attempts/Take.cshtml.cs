@@ -1,5 +1,4 @@
 using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
-using DepartmentNames = AAExamManagementSystem.Models.Entities.Departments;
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
@@ -32,6 +31,12 @@ public class TakeModel : PageModel
 
     public bool AlreadyAttempted { get; set; }
 
+    public string? SectionName { get; set; }
+
+    public string? FirstChoice { get; set; }
+
+    public string? SecondChoice { get; set; }
+
     public IList<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
 
     [TempData]
@@ -52,10 +57,22 @@ public class TakeModel : PageModel
             return Page();
         }
 
-        AlreadyAttempted = await _context.Attempts.AnyAsync(a => a.ApplicantId == applicant.Id);
-        if (!AlreadyAttempted)
+        FirstChoice = applicant.FirstChoice;
+        SecondChoice = applicant.SecondChoice;
+
+        var existingAttempt = await _context.Attempts
+            .Where(a => a.ApplicantId == applicant.Id)
+            .OrderByDescending(a => a.DateCreated)
+            .FirstOrDefaultAsync();
+
+        AlreadyAttempted = existingAttempt is not null;
+        if (AlreadyAttempted)
         {
-            await LoadQuestionsAsync();
+            SectionName = existingAttempt!.Section;
+        }
+        else
+        {
+            await LoadQuestionsAsync(applicant);
         }
 
         return Page();
@@ -70,19 +87,27 @@ public class TakeModel : PageModel
             return Page();
         }
 
+        FirstChoice = applicant.FirstChoice;
+        SecondChoice = applicant.SecondChoice;
+
         if (await _context.Attempts.AnyAsync(a => a.ApplicantId == applicant.Id))
         {
             AlreadyAttempted = true;
             return Page();
         }
 
-        await LoadQuestionsAsync();
+        await LoadQuestionsAsync(applicant);
+
+        if (Questions.Count == 0)
+        {
+            return Page();
+        }
 
         var attempt = new Attempt
         {
             ApplicantId = applicant.Id,
             AcademicYear = applicant.AcademicYear,
-            Section = DepartmentNames.WebDevelopment,
+            Section = SectionName,
             DateTaken = DateTime.UtcNow.ToString("o"),
         };
 
@@ -130,11 +155,21 @@ public class TakeModel : PageModel
         return await _context.Applicants.FirstOrDefaultAsync(a => a.UserId == userId);
     }
 
-    private async Task LoadQuestionsAsync()
+    private async Task LoadQuestionsAsync(Applicant applicant)
     {
+        SectionName = await ResolveSectionNameAsync(applicant.FirstChoice)
+            ?? await ResolveSectionNameAsync(applicant.SecondChoice);
+
+        if (SectionName is null)
+        {
+            Questions = new List<QuestionDto>();
+            return;
+        }
+
+        var sectionName = SectionName;
         var questions = await _context.Questions
             .Include(q => q.Section)
-            .Where(q => q.IsActive && q.Section.Name == DepartmentNames.WebDevelopment)
+            .Where(q => q.IsActive && q.Section.Name == sectionName)
             .OrderBy(q => q.DateCreated)
             .Take(QuestionCount)
             .ToListAsync();
@@ -155,5 +190,28 @@ public class TakeModel : PageModel
         {
             question.Choices = await _choiceService.GetChoicesAsync(question.Id);
         }
+    }
+
+    private async Task<string?> ResolveSectionNameAsync(string? choice)
+    {
+        if (string.IsNullOrWhiteSpace(choice))
+        {
+            return null;
+        }
+
+        var trimmedChoice = choice.Trim();
+
+        var hasQuestions = await _context.Questions
+            .AnyAsync(q => q.IsActive && q.Section.IsActive && q.Section.Name.ToLower() == trimmedChoice.ToLower());
+
+        if (!hasQuestions)
+        {
+            return null;
+        }
+
+        return await _context.Sections
+            .Where(s => s.IsActive && s.Name.ToLower() == trimmedChoice.ToLower())
+            .Select(s => s.Name)
+            .FirstAsync();
     }
 }

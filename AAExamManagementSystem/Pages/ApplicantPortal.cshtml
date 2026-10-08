@@ -70,4 +70,15 @@ else
             </dl>
         </div>
     </div>
+
+    @if (Model.AttemptCount == 0)
+    {
+        <a asp-page="/Attempts/Take" class="btn btn-primary">
+            <i class="bi bi-pencil-square me-1" aria-hidden="true"></i> Take Assessment
+        </a>
+    }
+    else
+    {
+        <div class="alert alert-info mb-0">You have already submitted your assessment. It is awaiting review.</div>
+    }
 }

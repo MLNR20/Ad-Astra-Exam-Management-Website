@@ -334,6 +334,25 @@ header .navbar {
   border-radius: 1rem;
 }
 
+/* Applicant login split screen */
+.applicant-login-split {
+  min-height: 100vh;
+}
+
+.applicant-login-form-pane {
+  flex: 1 1 50%;
+}
+
+.applicant-login-aside {
+  flex: 1 1 50%;
+  background-color: #1c1c1c;
+}
+
+.applicant-login-aside-logo {
+  width: 120px;
+  height: auto;
+}
+
 .login-logo {
   width: 64px;
   height: 64px;

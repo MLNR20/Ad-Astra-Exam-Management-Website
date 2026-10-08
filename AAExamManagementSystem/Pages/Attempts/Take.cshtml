@@ -8,7 +8,7 @@
 <div class="exam-sim-hero d-flex flex-column align-items-center justify-content-center text-center px-3">
     <div class="exam-sim-hero-overlay"></div>
     <div class="exam-sim-hero-content">
-        <h1 class="exam-sim-hero-title text-white fw-bold mb-2">Web Development Qualifying Exam</h1>
+        <h1 class="exam-sim-hero-title text-white fw-bold mb-2">@(Model.SectionName ?? "Qualifying") Exam</h1>
         <p class="exam-sim-hero-subtitle text-white mb-0">Answer all 10 questions below. This exam can only be taken once.</p>
     </div>
 </div>
@@ -33,7 +33,11 @@
         }
         else if (Model.Questions.Count == 0)
         {
-            <p class="fs-5 mb-3">No active Web Development questions are available right now.</p>
+            <p class="fs-5 mb-3">
+                No active exam questions are available right now for your first choice
+                (@(Model.FirstChoice ?? "not set")) or second choice (@(Model.SecondChoice ?? "not set")).
+                Please check back later or contact Ad Astra.
+            </p>
             <a asp-page="/ApplicantPortal" class="btn btn-outline-secondary">Back to Applicant Portal</a>
         }
         else
@@ -41,7 +45,7 @@
             <form method="post" id="examForm">
                 <div class="d-flex flex-wrap justify-content-between align-items-end gap-4 mb-4">
                     <div>
-                        <h4 class="fw-bold mb-1">Web Development</h4>
+                        <h4 class="fw-bold mb-1">@Model.SectionName</h4>
                         <h5 class="text-muted fw-normal mb-0">Select one answer for each question, then submit.</h5>
                     </div>
                     <span class="badge bg-primary rounded-pill">@Model.Questions.Sum(q => q.Score) pt(s) total</span>
