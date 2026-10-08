@@ -56,10 +56,10 @@
                 <form method="post" id="signupForm" novalidate>
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mx-4 mx-md-5" role="alert"></div>
 
-                    <div class="row g-0 border-top">
+                    <div class="row g-0">
                         <div class="col-lg-8 px-2 px-md-3 pt-2 pb-8">
                             <div class="signup-panel" data-panel="1">
-                                <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Account Information</h2>
+                                <h2 class="h6 text-uppercase text-muted fw-semibold mb-3 mt-3">Account Information</h2>
                                 <div class="row">
                                     <div class="col-12 mb-3">
                                         <label asp-for="Input.UserName" class="form-label fw-semibold"></label>
@@ -204,7 +204,7 @@
                                 </button>
                             </div>
 
-                            <p class="text-center text-muted small mt-4 mb-0">
+                            <p class="text-center text-muted mt-4 mb-0">
                                 Already have an account? <a asp-page="/Login">Login</a>
                             </p>
                         </div>
