@@ -35,7 +35,7 @@
                                 <pre class="mb-0 audit-response-body">@log.ResponseBody</pre>
                             </td>
                             <td class="text-start">
-                                @if (log.Type == "Login")
+                                @if (log.Type == "Login" || log.Type == "Logout")
                                 {
                                     @await Component.InvokeAsync("StatusPill", new { isActive = log.IsActive, activeText = "Success", inactiveText = "Failed" })
                                 }

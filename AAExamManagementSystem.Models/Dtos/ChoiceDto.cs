@@ -8,6 +8,7 @@ public class ChoiceDto
     public string ChoiceText { get; set; } = string.Empty;
     public bool IsCorrect { get; set; }
     public bool IsActive { get; set; } = true;
+    public string? SectionName { get; set; }
 }
 
 public class ChoiceCreateUpdateDto

@@ -38,6 +38,10 @@
                     <thead>
                         <tr>
                             <th class="text-start">Name</th>
+                            @if (Model.ShowSectionColumn)
+                            {
+                                <th class="text-start">Section</th>
+                            }
                             @if (Model.ShowRolesColumn)
                             {
                                 <th class="text-start">Roles</th>
@@ -62,6 +66,10 @@
                         {
                             <tr>
                                 <td class="text-start">@item.Name</td>
+                                @if (Model.ShowSectionColumn)
+                                {
+                                    <td class="text-start">@(string.IsNullOrEmpty(item.Section) ? "-" : item.Section)</td>
+                                }
                                 @if (Model.ShowRolesColumn)
                                 {
                                     <td class="text-start">@(string.IsNullOrEmpty(item.Roles) ? "-" : item.Roles)</td>

@@ -4,17 +4,20 @@ using AAExamManagementSystem.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace AAExamManagementSystem.Pages.Choices;
 
 public class IndexModel : PageModel
 {
     private readonly IGenericRepository<Choice> _repository;
+    private readonly ApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    public IndexModel(IGenericRepository<Choice> repository, IMapper mapper)
+    public IndexModel(IGenericRepository<Choice> repository, ApplicationDbContext context, IMapper mapper)
     {
         _repository = repository;
+        _context = context;
         _mapper = mapper;
     }
 
@@ -64,7 +67,20 @@ public class IndexModel : PageModel
 
     private async Task LoadChoicesAsync()
     {
-        var choices = await _repository.GetAllAsync();
-        Choices = _mapper.Map<IList<ChoiceDto>>(choices.OrderByDescending(c => c.DateCreated));
+        var choices = await _context.Choices
+            .Include(c => c.QuestionAndChoices)
+            .ThenInclude(qc => qc.Question)
+            .ThenInclude(q => q.Section)
+            .OrderByDescending(c => c.DateCreated)
+            .ToListAsync();
+
+        Choices = _mapper.Map<IList<ChoiceDto>>(choices);
+        foreach (var dto in Choices)
+        {
+            var choice = choices.First(c => c.Id == dto.Id);
+            dto.SectionName = choice.QuestionAndChoices
+                .Select(qc => qc.Question?.Section?.Name)
+                .FirstOrDefault(name => !string.IsNullOrEmpty(name));
+        }
     }
 }

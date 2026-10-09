@@ -9,11 +9,12 @@
     tableId = "choicesTable",
     basePath = "/Choices",
     emptyMessage = "No choices found.",
-    items = Model.Choices.Select(c => new EntityTableRow(c.Id.ToString(), c.ChoiceText.Length > 80 ? c.ChoiceText.Substring(0, 80) + "…" : c.ChoiceText, c.IsActive)),
+    items = Model.Choices.Select(c => new EntityTableRow(c.Id.ToString(), c.ChoiceText.Length > 80 ? c.ChoiceText.Substring(0, 80) + "…" : c.ChoiceText, c.IsActive, Section: c.SectionName)),
     title = "Choices",
     addButtonText = "New Choice",
     addButtonModalTarget = "#createChoiceModal",
     showStatusColumn = true,
+    showSectionColumn = true,
     confirmDeleteWithSweetAlert = true,
     confirmCreateWithSweetAlert = true,
     entityName = "Choice"
