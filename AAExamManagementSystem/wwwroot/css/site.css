@@ -51,11 +51,22 @@ html {
   --app-header-height: 64px;
 }
 
+.app-shell-body {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-shell {
+  height: 100vh;
+}
+
 #sidebar.sidebar {
   width: 240px;
   min-width: 240px;
-  min-height: 100vh;
-  overflow: hidden;
+  height: 100vh;
+  flex-shrink: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   transition: width 0.2s ease, min-width 0.2s ease;
 }
 
@@ -93,6 +104,8 @@ header .navbar {
 
 .main-content {
   min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 #sidebar.sidebar.collapsed {
