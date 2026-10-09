@@ -117,6 +117,108 @@ public static class IdentitySeeder
         await SeedProgrammingLanguageIdentificationQuestionsAsync(dbContext);
         await SeedProgrammingLanguageIconQuestionsAsync(dbContext);
         await SeedSqlQueryQuestionsAsync(dbContext);
+        await SeedPersonalityQuestionsAsync(dbContext);
+        await SeedGeneralKnowledgeQuestionsAsync(dbContext);
+        await SeedJavaScriptCodeSnippetQuestionsAsync(dbContext);
+    }
+
+    private static readonly string[] PersonalityQuestions =
+    {
+        "Done is better than perfect?",
+        "What is your greatest strength?"
+    };
+
+    private static async Task SeedPersonalityQuestionsAsync(ApplicationDbContext dbContext)
+    {
+        var section = dbContext.Sections.FirstOrDefault(s => s.Name == Departments.Personality);
+        if (section is null)
+        {
+            return;
+        }
+
+        var essayType = dbContext.QuestionTypes.FirstOrDefault(qt => qt.Name == QuestionTypes.Essay);
+        if (essayType is null)
+        {
+            return;
+        }
+
+        foreach (var questionTitle in PersonalityQuestions)
+        {
+            var exists = dbContext.Questions.Any(q => q.QuestionTitle == questionTitle && q.SectionId == section.Id);
+            if (exists)
+            {
+                continue;
+            }
+
+            dbContext.Questions.Add(new Question
+            {
+                QuestionTypeId = essayType.Id,
+                SectionId = section.Id,
+                QuestionTitle = questionTitle,
+                IsUpToEvaluation = true,
+                Score = 1
+            });
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    private static readonly (string QuestionTitle, string[] Choices, int CorrectIndex)[] GeneralKnowledgeQuestions =
+    {
+        ("What does SPU stand for?",
+            new[] { "Student Publication Unit", "Student Press Union", "Student Program Unit", "Student Publishing Union" }, 0)
+    };
+
+    private static async Task SeedGeneralKnowledgeQuestionsAsync(ApplicationDbContext dbContext)
+    {
+        var section = dbContext.Sections.FirstOrDefault(s => s.Name == Departments.GeneralKnowledge);
+        if (section is null)
+        {
+            return;
+        }
+
+        var multipleChoiceType = dbContext.QuestionTypes.FirstOrDefault(qt => qt.Name == QuestionTypes.MultipleChoice);
+        if (multipleChoiceType is null)
+        {
+            return;
+        }
+
+        foreach (var (questionTitle, choices, correctIndex) in GeneralKnowledgeQuestions)
+        {
+            var exists = dbContext.Questions.Any(q => q.QuestionTitle == questionTitle && q.SectionId == section.Id);
+            if (exists)
+            {
+                continue;
+            }
+
+            var question = new Question
+            {
+                QuestionTypeId = multipleChoiceType.Id,
+                SectionId = section.Id,
+                QuestionTitle = questionTitle,
+                Score = 1
+            };
+
+            dbContext.Questions.Add(question);
+
+            for (var i = 0; i < choices.Length; i++)
+            {
+                var choice = new Choice
+                {
+                    ChoiceText = choices[i],
+                    IsCorrect = i == correctIndex
+                };
+
+                dbContext.Choices.Add(choice);
+                dbContext.QuestionAndChoices.Add(new QuestionAndChoice
+                {
+                    Question = question,
+                    Choice = choice
+                });
+            }
+        }
+
+        await dbContext.SaveChangesAsync();
     }
 
     private static readonly (string QuestionTitle, string[] Choices, int CorrectIndex)[] WebDevelopmentQuestions =
@@ -366,6 +468,52 @@ public static class IdentitySeeder
 
             dbContext.Questions.Add(question);
             AddIdentificationAnswer(dbContext, question, answer);
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    private static readonly string[] JavaScriptCodeSnippetQuestions =
+    {
+        "Basic Challenge: The following JavaScript function should return the sum of two numbers, but it has a bug. Identify the bug and provide the corrected code.\n\nfunction add(a, b) {\n  return a - b;\n}",
+        "Basic Challenge: The following JavaScript loop should print the numbers 1 to 5, but it has a bug. Identify the bug and provide the corrected code.\n\nfor (let i = 1; i <= 5; i--) {\n  console.log(i);\n}"
+    };
+
+    private static async Task SeedJavaScriptCodeSnippetQuestionsAsync(ApplicationDbContext dbContext)
+    {
+        var section = dbContext.Sections.FirstOrDefault(s => s.Name == Departments.WebDevelopment);
+        if (section is null)
+        {
+            return;
+        }
+
+        var essayType = dbContext.QuestionTypes.FirstOrDefault(qt => qt.Name == QuestionTypes.Essay);
+        if (essayType is null)
+        {
+            return;
+        }
+
+        Console.WriteLine("Seeding JavaScript code snippet challenge questions:");
+
+        foreach (var questionTitle in JavaScriptCodeSnippetQuestions)
+        {
+            var exists = dbContext.Questions.Any(q => q.QuestionTitle == questionTitle && q.SectionId == section.Id);
+            if (exists)
+            {
+                Console.WriteLine($"  - (already seeded) {questionTitle.Split('\n')[0]}");
+                continue;
+            }
+
+            dbContext.Questions.Add(new Question
+            {
+                QuestionTypeId = essayType.Id,
+                SectionId = section.Id,
+                QuestionTitle = questionTitle,
+                IsUpToEvaluation = true,
+                Score = 1
+            });
+
+            Console.WriteLine($"  - {questionTitle.Split('\n')[0]}");
         }
 
         await dbContext.SaveChangesAsync();
