@@ -18,13 +18,25 @@
                     <span asp-validation-for="Question.QuestionTypeId" class="text-danger"></span>
                 </div>
                 <partial name="_ChoicesEditor" model="new ChoicesEditorModel(nameof(Model.Question), Model.Question.Choices, Model.ChoiceTypeIds)" />
-                <div class="mb-3">
-                    <label asp-for="Question.SectionId" class="form-label"></label>
-                    <select asp-for="Question.SectionId" class="form-select" asp-items="Model.SectionOptions">
-                        <option value="">-- Select Section --</option>
-                    </select>
-                    <span asp-validation-for="Question.SectionId" class="text-danger"></span>
-                </div>
+                @if (Model.IsAdmin)
+                {
+                    <div class="mb-3">
+                        <label asp-for="Question.SectionId" class="form-label"></label>
+                        <select asp-for="Question.SectionId" class="form-select" asp-items="Model.SectionOptions">
+                            <option value="">-- Select Section --</option>
+                        </select>
+                        <span asp-validation-for="Question.SectionId" class="text-danger"></span>
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" asp-for="Question.SectionId" />
+                    <div class="mb-3">
+                        <label class="form-label">Section</label>
+                        <input type="text" class="form-control" value="@Model.CurrentUserSectionName" disabled />
+                        <div class="form-text">Editors can only edit questions within their assigned department.</div>
+                    </div>
+                }
                 <div class="mb-3">
                     <label asp-for="Question.QuestionTitle" class="form-label"></label>
                     <textarea asp-for="Question.QuestionTitle" class="form-control" rows="2"></textarea>

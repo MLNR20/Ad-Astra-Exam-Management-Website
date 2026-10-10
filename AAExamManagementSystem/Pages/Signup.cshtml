@@ -35,20 +35,10 @@
             </div>
 
             <div class="container-fluid mt-4">
-                <div class="signup-steps d-flex justify-content-start gap-4 gap-md-6 pb-2 px-2 px-md-3">
-                    <div class="signup-step active" data-step="1">
-                        <span class="signup-step-circle">1</span>
-                        <span class="signup-step-label">General</span>
-                    </div>
-                    <div class="signup-step" data-step="2">
-                        <span class="signup-step-circle">2</span>
-                        <span class="signup-step-label">Academic</span>
-                    </div>
-                    <div class="signup-step" data-step="3">
-                        <span class="signup-step-circle">3</span>
-                        <span class="signup-step-label">Submission</span>
-                    </div>
+                <div class="signup-steps pb-2 ps-0 pe-2 pe-md-3">
+                    <span class="fw-semibold" id="signupStepCounter" style="font-size: 1.2rem;">Step 1 of 3</span>
                 </div>
+                <hr />
             </div>
 
             <div class="signup-wizard-card w-100">
@@ -57,36 +47,36 @@
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mx-4 mx-md-5" role="alert"></div>
 
                     <div class="row g-0">
-                        <div class="col-lg-8 px-2 px-md-3 pt-2 pb-8">
+                        <div class="col-12 px-2 px-md-3 pt-2 pb-8">
                             <div class="signup-panel" data-panel="1">
                                 <h2 class="h6 text-uppercase text-muted fw-semibold mb-3 mt-3">Account Information</h2>
                                 <div class="row">
-                                    <div class="col-12 mb-3">
+                                    <div class="col-12 mb-4">
                                         <label asp-for="Input.UserName" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.UserName" class="form-control" autocomplete="username" autofocus />
                                         <span asp-validation-for="Input.UserName" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-12 mb-3">
+                                    <div class="col-12 mb-4">
                                         <label asp-for="Input.Email" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.Email" class="form-control" autocomplete="email" />
                                         <span asp-validation-for="Input.Email" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-12 mb-3">
+                                    <div class="col-12 mb-4">
                                         <label asp-for="Input.Password" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
                                         <span asp-validation-for="Input.Password" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-12 mb-3">
+                                    <div class="col-12 mb-4">
                                         <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
                                         <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-12 mb-3">
+                                    <div class="col-12 mb-4">
                                         <label asp-for="Input.FirstName" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.FirstName" class="form-control" />
                                         <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-12 mb-3">
+                                    <div class="col-12 mb-4">
                                         <label asp-for="Input.LastName" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.LastName" class="form-control" />
                                         <span asp-validation-for="Input.LastName" class="text-danger small"></span>
@@ -97,42 +87,42 @@
                             <div class="signup-panel d-none" data-panel="2">
                                 <h2 class="h6 text-uppercase text-muted fw-semibold mb-3">Academic Information</h2>
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.StudentNo" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.StudentNo" class="form-control" />
                                         <span asp-validation-for="Input.StudentNo" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.AcademicYear" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.AcademicYear" class="form-control" placeholder="e.g. 2026-2027" />
                                         <span asp-validation-for="Input.AcademicYear" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.YearLevel" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.YearLevel" class="form-control" />
                                         <span asp-validation-for="Input.YearLevel" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.School" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.School" class="form-control" />
                                         <span asp-validation-for="Input.School" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.FirstChoice" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.FirstChoice" class="form-control" />
                                         <span asp-validation-for="Input.FirstChoice" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.SecondChoice" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.SecondChoice" class="form-control" />
                                         <span asp-validation-for="Input.SecondChoice" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.ExpectedGradDate" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.ExpectedGradDate" class="form-control" />
                                         <span asp-validation-for="Input.ExpectedGradDate" class="text-danger small"></span>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label asp-for="Input.TermsRemaining" class="form-label fw-semibold"></label>
                                         <input asp-for="Input.TermsRemaining" class="form-control" type="number" min="0" />
                                         <span asp-validation-for="Input.TermsRemaining" class="text-danger small"></span>
@@ -192,50 +182,21 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex align-items-center mt-4">
-                                <button type="button" class="btn btn-outline-secondary px-4 signup-prev d-none">
+                            <div class="d-flex align-items-center gap-2 mt-5">
+                                <button type="button" class="btn btn-outline-secondary btn-lg px-4 signup-prev d-none">
                                     <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Back
                                 </button>
-                                <button type="button" class="btn btn-dark px-4 signup-next">
+                                <button type="button" class="btn btn-dark btn-lg px-4 signup-next">
                                     Next <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
                                 </button>
-                                <button type="submit" class="btn btn-primary px-4 d-none signup-submit">
+                                <button type="submit" class="btn btn-primary btn-lg px-4 d-none signup-submit">
                                     <i class="bi bi-send-check me-1" aria-hidden="true"></i> Submit Application
                                 </button>
                             </div>
 
-                            <p class="text-center text-muted mt-4 mb-0">
+                            <p class="text-start text-muted fs-5 mt-4 mb-0">
                                 Already have an account? <a asp-page="/ApplicantLogin">Login</a>
                             </p>
-                        </div>
-
-                        <div class="col-lg-4 signup-guidelines px-2 px-md-3 py-8 border-start">
-                            <div class="signup-guideline-panel" data-guideline="1">
-                                <h2 class="h6 fw-bold mb-3"><i class="bi bi-info-circle me-1" aria-hidden="true"></i> General Guidelines</h2>
-                                <ul class="signup-guideline-list">
-                                    <li>Choose a username that's 3&ndash;50 characters long &mdash; you'll use it to log in.</li>
-                                    <li>Use a personal email address you check regularly; we'll send updates about your application there.</li>
-                                    <li>Your password must be at least 6 characters long.</li>
-                                    <li>Enter your legal first and last name as they appear on your school records.</li>
-                                </ul>
-                            </div>
-                            <div class="signup-guideline-panel d-none" data-guideline="2">
-                                <h2 class="h6 fw-bold mb-3"><i class="bi bi-mortarboard me-1" aria-hidden="true"></i> Academic Guidelines</h2>
-                                <ul class="signup-guideline-list">
-                                    <li>Enter your official student number exactly as issued by the school.</li>
-                                    <li>Academic year should follow the format <strong>2026-2027</strong>.</li>
-                                    <li>List your first and second department or publication choices in order of preference.</li>
-                                    <li>Check "I am a scholar" if you're currently receiving a scholarship &mdash; this may affect priority review.</li>
-                                </ul>
-                            </div>
-                            <div class="signup-guideline-panel d-none" data-guideline="3">
-                                <h2 class="h6 fw-bold mb-3"><i class="bi bi-send-check me-1" aria-hidden="true"></i> Before You Submit</h2>
-                                <ul class="signup-guideline-list">
-                                    <li>A resume link is optional but recommended to strengthen your application.</li>
-                                    <li>Review the summary carefully &mdash; you won't be able to edit these details once submitted.</li>
-                                    <li>Click <strong>Submit Application</strong> to create your account and send your application for review.</li>
-                                </ul>
-                            </div>
                         </div>
                     </div>
                 </form>
@@ -253,21 +214,15 @@
         (function () {
             var totalSteps = 3;
             var current = 1;
-            var steps = document.querySelectorAll('.signup-step');
             var panels = document.querySelectorAll('.signup-panel');
-            var guidelines = document.querySelectorAll('.signup-guideline-panel');
+            var stepCounter = document.getElementById('signupStepCounter');
             var nextBtn = document.querySelector('.signup-next');
             var prevBtn = document.querySelector('.signup-prev');
             var submitBtn = document.querySelector('.signup-submit');
 
             function showStep(step) {
                 panels.forEach(function (p) { p.classList.toggle('d-none', Number(p.dataset.panel) !== step); });
-                guidelines.forEach(function (g) { g.classList.toggle('d-none', Number(g.dataset.guideline) !== step); });
-                steps.forEach(function (s) {
-                    var n = Number(s.dataset.step);
-                    s.classList.toggle('active', n === step);
-                    s.classList.toggle('completed', n < step);
-                });
+                stepCounter.textContent = 'Step ' + step + ' of ' + totalSteps;
                 prevBtn.classList.toggle('d-none', step === 1);
                 nextBtn.classList.toggle('d-none', step === totalSteps);
                 submitBtn.classList.toggle('d-none', step !== totalSteps);
@@ -321,13 +276,6 @@
 
             prevBtn.addEventListener('click', function () {
                 if (current > 1) showStep(current - 1);
-            });
-
-            steps.forEach(function (stepEl) {
-                stepEl.addEventListener('click', function () {
-                    var target = Number(stepEl.dataset.step);
-                    if (target < current) showStep(target);
-                });
             });
         })();
     </script>

@@ -41,11 +41,10 @@ public class SignupModel : PageModel
             return Page();
         }
 
-        var existingUser = await _userManager.FindByNameAsync(Input.UserName)
-            ?? await _userManager.FindByEmailAsync(Input.Email);
+        var existingUser = await _userManager.FindByNameAsync(Input.UserName);
         if (existingUser is not null)
         {
-            ModelState.AddModelError(string.Empty, "An account with that username or email already exists.");
+            ModelState.AddModelError(string.Empty, "An account with that username already exists.");
             return Page();
         }
 

@@ -1,13 +1,16 @@
+using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
 using AAExamManagementSystem.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace AAExamManagementSystem.Pages.Questions;
 
+[Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Editor}")]
 public class SimulateModel : PageModel
 {
     private readonly IGenericRepository<Question> _repository;

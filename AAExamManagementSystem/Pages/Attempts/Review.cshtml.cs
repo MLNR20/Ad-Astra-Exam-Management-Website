@@ -22,6 +22,27 @@ public class ReviewModel : PageModel
         _userManager = userManager;
     }
 
+    private async Task<bool> CanAccessSectionAsync(string? attemptSection)
+    {
+        if (User.IsInRole(AppRoles.Admin))
+        {
+            return true;
+        }
+
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser?.SectionId is null)
+        {
+            return false;
+        }
+
+        var currentUserSectionName = await _context.Sections
+            .Where(s => s.Id == currentUser.SectionId)
+            .Select(s => s.Name)
+            .FirstOrDefaultAsync();
+
+        return currentUserSectionName is not null && currentUserSectionName == attemptSection;
+    }
+
     public AttemptReviewDto? Attempt { get; set; }
 
     [BindProperty]
@@ -33,7 +54,17 @@ public class ReviewModel : PageModel
     public async Task<IActionResult> OnGetAsync(int id)
     {
         Attempt = await LoadAttemptAsync(id);
-        return Attempt is null ? NotFound() : Page();
+        if (Attempt is null)
+        {
+            return NotFound();
+        }
+
+        if (!await CanAccessSectionAsync(Attempt.Section))
+        {
+            return Forbid();
+        }
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostApproveAsync(int id)
@@ -46,6 +77,11 @@ public class ReviewModel : PageModel
         if (attempt is null)
         {
             return NotFound();
+        }
+
+        if (!await CanAccessSectionAsync(attempt.Section))
+        {
+            return Forbid();
         }
 
         var currentUser = await _userManager.GetUserAsync(User);

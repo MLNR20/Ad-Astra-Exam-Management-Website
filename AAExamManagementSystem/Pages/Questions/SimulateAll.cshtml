@@ -5,7 +5,7 @@
     Layout = "_ExamLayout";
 }
 
-@if (Model.Questions.Count > 0)
+@if (!Model.RequiresSectionSelection && !Model.NoDepartmentAssigned && Model.Questions.Count > 0)
 {
     @section NavbarTimer {
         <span class="d-flex align-items-center gap-2 fw-semibold text-danger">
@@ -15,108 +15,144 @@
     }
 }
 
-<div class="exam-sim-hero d-flex flex-column align-items-center justify-content-center text-center px-3">
-    <div class="exam-sim-hero-overlay"></div>
-    <div class="exam-sim-hero-content">
-        @if (Model.HasPreviousPage)
-        {
-            <h1 class="exam-sim-hero-title text-white fw-bold mb-2">SQL Queries</h1>
-            <p class="exam-sim-hero-subtitle text-white mb-0">Write the SQL query that answers each question about the schema shown.</p>
-        }
-        else
-        {
-            <h1 class="exam-sim-hero-title text-white fw-bold mb-2">General Knowledge</h1>
-            <p class="exam-sim-hero-subtitle text-white mb-0">This section aims to gauge your familiarity in programming and development concepts.</p>
-        }
-    </div>
-</div>
+@if (Model.RequiresSectionSelection)
+{
+    <div class="py-5 px-3">
+        <div class="mx-auto exam-sim-wrap">
+            <h1 class="h3 fw-bold mb-1">Choose an exam to simulate</h1>
+            <h5 class="text-muted fw-normal mb-4">Select the department exam you want to preview. General Knowledge questions are appended at the end automatically.</h5>
 
-<div class="py-5 px-3">
-    <div class="mx-auto exam-sim-wrap">
-        <div class="d-flex flex-wrap justify-content-between align-items-end gap-4 mb-4">
-            <div>
-                <h4 class="fw-bold mb-1">@(Model.HasPreviousPage ? "SQL Query Questions" : "Multiple Choice Questions")</h4>
-                <h5 class="text-muted fw-normal mb-0">Answer every question below, then submit to see your score.</h5>
-            </div>
-            @if (Model.Questions.Count > 0)
+            @if (Model.SelectableSections.Count == 0)
             {
-                <span class="badge bg-primary rounded-pill">@Model.Questions.Sum(q => q.Score) pt(s) total</span>
+                <p class="fs-5 mb-3">No active departments are available to simulate.</p>
+                <a href="/Questions" class="btn btn-outline-secondary">Back to Questions</a>
             }
-        </div>
-
-        @if (Model.Questions.Count == 0)
-        {
-            <p class="fs-5 mb-3">No active multiple choice questions available to simulate.</p>
-            <a href="/Questions" class="btn btn-outline-secondary">Back to Questions</a>
-        }
-        else
-        {
-            @for (var qi = 0; qi < Model.Questions.Count; qi++)
+            else
             {
-                var question = Model.Questions[qi];
-                var isIdentification = question.QuestionTypeName == AAExamManagementSystem.Models.Entities.QuestionTypes.Identification;
-                <div class="exam-sim-question mb-4 pb-4 border-bottom" data-question-index="@qi" data-question-type="@question.QuestionTypeName">
-                    <h5 class="fw-semibold mb-2">
-                        @(qi + 1). @question.QuestionTitle
-                    </h5>
-                    <div class="exam-sim-choices">
-                        @if (isIdentification)
-                        {
-                            var correctAnswer = question.Choices.FirstOrDefault(c => c.IsCorrect)?.ChoiceText ?? string.Empty;
-                            var isSqlQuestion = question.Image != null && question.Image.Contains("sql-schema");
-                            var inputPlaceholder = isSqlQuestion ? "Type your SQL query" : "Type the programming language name";
-                            var inputClass = isSqlQuestion ? "form-control exam-sim-input exam-sim-input-sql" : "form-control exam-sim-input";
-                            <input type="text" class="@inputClass" name="q@(qi)" id="q@(qi)_input" data-answer="@correctAnswer" placeholder="@inputPlaceholder" autocomplete="off" />
-                        }
-                        else
-                        {
-                            @for (var ci = 0; ci < question.Choices.Count; ci++)
-                            {
-                                var choice = question.Choices[ci];
-                                <div class="form-check exam-sim-choice mb-2">
-                                    <input class="form-check-input" type="radio" name="q@(qi)" id="q@(qi)_c@(ci)" data-correct="@choice.IsCorrect.ToString().ToLowerInvariant()" />
-                                    <label class="form-check-label" for="q@(qi)_c@(ci)">@choice.ChoiceText</label>
-                                </div>
-                            }
-                        }
-                    </div>
-                    @if (!string.IsNullOrEmpty(question.Image))
+                <div class="list-group">
+                    @foreach (var sectionOption in Model.SelectableSections)
                     {
-                        var isSqlSchemaImage = question.Image.Contains("sql-schema");
-                        var imageClass = isSqlSchemaImage
-                            ? "exam-sim-question-image exam-sim-question-image-wide img-fluid rounded mt-3 d-block mx-auto"
-                            : "exam-sim-question-image img-fluid rounded mt-3 d-block mx-auto";
-                        <img src="@question.Image" class="@imageClass" alt="" />
+                        <a href="?SectionId=@sectionOption.Id" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">@sectionOption.Name</span>
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        </a>
                     }
-                    <div class="exam-sim-result mt-2" id="result@(qi)"></div>
                 </div>
             }
-            <div id="simSummary" class="d-none text-center mb-4"></div>
-
-            <div class="d-flex justify-content-between mb-5">
-                @if (Model.HasPreviousPage)
-                {
-                    <a href="?PageNumber=1" class="btn btn-outline-secondary">Previous</a>
-                }
-                else
-                {
-                    <a href="/Questions" class="btn btn-outline-secondary">Exit Preview</a>
-                }
-                <button type="button" id="submitAllSim" class="btn btn-primary">Submit All Answers</button>
-            </div>
-
-            <div class="alert alert-secondary">
-                <h2 class="h6 fw-bold mb-2">Instructions</h2>
-                <ul class="mb-0 ps-3">
-                    <li>Select exactly one answer for each question.</li>
-                    <li>All questions must be answered before you can submit.</li>
-                    <li>Once you submit, your answers are final and cannot be changed.</li>
-                    <li>Each question's point value is shown next to its title.</li>
-                </ul>
-            </div>
-        }
+        </div>
     </div>
-</div>
+}
+else if (Model.NoDepartmentAssigned)
+{
+    <div class="py-5 px-3">
+        <div class="mx-auto exam-sim-wrap text-center">
+            <h1 class="h3 fw-bold mb-3">No department assigned</h1>
+            <p class="fs-5 mb-4">Your account doesn't have a department assigned yet, so there's no exam to simulate. Contact an administrator to get assigned to a department.</p>
+            <a href="/Questions" class="btn btn-outline-secondary">Back to Questions</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="exam-sim-hero d-flex flex-column align-items-center justify-content-center text-center px-3">
+        <div class="exam-sim-hero-overlay"></div>
+        <div class="exam-sim-hero-content">
+            <h1 class="exam-sim-hero-title text-white fw-bold mb-2">@Model.StageTitle</h1>
+            <p class="exam-sim-hero-subtitle text-white mb-0">@Model.StageSubtitle</p>
+        </div>
+    </div>
+
+    <div class="py-5 px-3">
+        <div class="mx-auto exam-sim-wrap">
+            <div class="d-flex flex-wrap justify-content-between align-items-end gap-4 mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">@Model.StageHeading</h4>
+                    <h5 class="text-muted fw-normal mb-0">Answer every question below, then submit to see your score.</h5>
+                </div>
+                @if (Model.Questions.Count > 0)
+                {
+                    <span class="badge bg-primary rounded-pill">@Model.Questions.Sum(q => q.Score) pt(s) total</span>
+                }
+            </div>
+
+            @if (Model.Questions.Count == 0)
+            {
+                <p class="fs-5 mb-3">No active multiple choice questions available to simulate.</p>
+                <a href="/Questions" class="btn btn-outline-secondary">Back to Questions</a>
+            }
+            else
+            {
+                @for (var qi = 0; qi < Model.Questions.Count; qi++)
+                {
+                    var question = Model.Questions[qi];
+                    var isIdentification = question.QuestionTypeName == AAExamManagementSystem.Models.Entities.QuestionTypes.Identification;
+                    <div class="exam-sim-question mb-4 pb-4 border-bottom" data-question-index="@qi" data-question-type="@question.QuestionTypeName">
+                        <h5 class="fw-semibold mb-2">
+                            @(qi + 1). @question.QuestionTitle
+                        </h5>
+                        <div class="exam-sim-choices">
+                            @if (isIdentification)
+                            {
+                                var correctAnswer = question.Choices.FirstOrDefault(c => c.IsCorrect)?.ChoiceText ?? string.Empty;
+                                var isSqlQuestion = question.Image != null && question.Image.Contains("sql-schema");
+                                var inputPlaceholder = isSqlQuestion ? "Type your SQL query" : "Type the programming language name";
+                                var inputClass = isSqlQuestion ? "form-control exam-sim-input exam-sim-input-sql" : "form-control exam-sim-input";
+                                <input type="text" class="@inputClass" name="q@(qi)" id="q@(qi)_input" data-answer="@correctAnswer" placeholder="@inputPlaceholder" autocomplete="off" />
+                            }
+                            else
+                            {
+                                @for (var ci = 0; ci < question.Choices.Count; ci++)
+                                {
+                                    var choice = question.Choices[ci];
+                                    <div class="form-check exam-sim-choice mb-2">
+                                        <input class="form-check-input" type="radio" name="q@(qi)" id="q@(qi)_c@(ci)" data-correct="@choice.IsCorrect.ToString().ToLowerInvariant()" />
+                                        <label class="form-check-label" for="q@(qi)_c@(ci)">@choice.ChoiceText</label>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(question.Image))
+                        {
+                            var isSqlSchemaImage = question.Image.Contains("sql-schema");
+                            var imageClass = isSqlSchemaImage
+                                ? "exam-sim-question-image exam-sim-question-image-wide img-fluid rounded mt-3 d-block mx-auto"
+                                : "exam-sim-question-image img-fluid rounded mt-3 d-block mx-auto";
+                            <img src="@question.Image" class="@imageClass" alt="" />
+                        }
+                        <div class="exam-sim-result mt-2" id="result@(qi)"></div>
+                    </div>
+                }
+                <div id="simSummary" class="d-none text-center mb-4"></div>
+
+                <div class="d-flex justify-content-between mb-5">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a href="?SectionId=@Model.SectionId&PageNumber=@(Model.PageNumber - 1)" class="btn btn-outline-secondary">Previous</a>
+                    }
+                    else if (Model.IsAdmin)
+                    {
+                        <a href="?" class="btn btn-outline-secondary">Choose Another Exam</a>
+                    }
+                    else
+                    {
+                        <a href="/Questions" class="btn btn-outline-secondary">Exit Preview</a>
+                    }
+                    <button type="button" id="submitAllSim" class="btn btn-primary">Submit All Answers</button>
+                </div>
+
+                <div class="alert alert-secondary">
+                    <h2 class="h6 fw-bold mb-2">Instructions</h2>
+                    <ul class="mb-0 ps-3">
+                        <li>Select exactly one answer for each question.</li>
+                        <li>All questions must be answered before you can submit.</li>
+                        <li>Once you submit, your answers are final and cannot be changed.</li>
+                        <li>Each question's point value is shown next to its title.</li>
+                    </ul>
+                </div>
+            }
+        </div>
+    </div>
+}
 
 @section Styles {
     <style>
@@ -180,13 +216,14 @@
     </style>
 }
 
-@if (Model.Questions.Count > 0)
+@if (!Model.RequiresSectionSelection && !Model.NoDepartmentAssigned && Model.Questions.Count > 0)
 {
     @section Scripts {
         <script>
             (function () {
                 var questionCount = @Model.Questions.Count;
                 var hasNextPage = @Json.Serialize(Model.HasNextPage);
+                var nextPageUrl = '?SectionId=@Model.SectionId&PageNumber=@(Model.PageNumber + 1)';
                 var submitBtn = document.getElementById('submitAllSim');
                 var summaryEl = document.getElementById('simSummary');
                 var submitted = false;
@@ -251,7 +288,7 @@
                     submitBtn.classList.add('d-none');
                     summaryEl.classList.remove('d-none');
                     var nextAction = hasNextPage
-                        ? '<a href="?PageNumber=2" class="btn btn-primary">Continue to SQL Questions</a>'
+                        ? '<a href="' + nextPageUrl + '" class="btn btn-primary">Continue</a>'
                         : '<a href="/Questions" class="btn btn-primary">Back to Questions</a>';
                     var timeUpNotice = timedOut ? '<p class="fs-5 text-danger fw-semibold mb-1">Time is up!</p>' : '';
                     summaryEl.innerHTML = timeUpNotice + '<p class="fs-5">You answered ' + score + ' out of ' + questionCount + ' correctly.</p>' +

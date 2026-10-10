@@ -1,8 +1,10 @@
+using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
 using AAExamManagementSystem.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -14,6 +16,7 @@ public class EditModel : PageModel
     private readonly IGenericRepository<Question> _repository;
     private readonly IGenericRepository<QuestionType> _questionTypeRepository;
     private readonly IGenericRepository<Section> _sectionRepository;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly QuestionChoiceService _choiceService;
     private readonly IMapper _mapper;
 
@@ -21,12 +24,14 @@ public class EditModel : PageModel
         IGenericRepository<Question> repository,
         IGenericRepository<QuestionType> questionTypeRepository,
         IGenericRepository<Section> sectionRepository,
+        UserManager<ApplicationUser> userManager,
         QuestionChoiceService choiceService,
         IMapper mapper)
     {
         _repository = repository;
         _questionTypeRepository = questionTypeRepository;
         _sectionRepository = sectionRepository;
+        _userManager = userManager;
         _choiceService = choiceService;
         _mapper = mapper;
     }
@@ -41,12 +46,26 @@ public class EditModel : PageModel
     public SelectList SectionOptions { get; set; } = new(new List<Section>(), "Id", "Name");
     public IList<int> ChoiceTypeIds { get; set; } = new List<int>();
 
+    public bool IsAdmin { get; set; }
+
+    public string? CurrentUserSectionName { get; set; }
+
     public async Task<IActionResult> OnGetAsync()
     {
         var question = await _repository.GetByIdAsync(Id);
         if (question is null)
         {
             return NotFound();
+        }
+
+        IsAdmin = User.IsInRole(AppRoles.Admin);
+        if (!IsAdmin)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser?.SectionId is null || currentUser.SectionId != question.SectionId)
+            {
+                return Forbid();
+            }
         }
 
         Question = new QuestionCreateUpdateDto
@@ -68,17 +87,29 @@ public class EditModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        var question = await _repository.GetByIdAsync(Id);
+        if (question is null)
+        {
+            return NotFound();
+        }
+
+        IsAdmin = User.IsInRole(AppRoles.Admin);
+        if (!IsAdmin)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser?.SectionId is null || currentUser.SectionId != question.SectionId)
+            {
+                return Forbid();
+            }
+
+            Question.SectionId = currentUser.SectionId.Value;
+        }
+
         await _choiceService.NormalizeAndValidateAsync(Question, ModelState, nameof(Question));
         if (!ModelState.IsValid)
         {
             await LoadOptionsAsync();
             return Page();
-        }
-
-        var question = await _repository.GetByIdAsync(Id);
-        if (question is null)
-        {
-            return NotFound();
         }
 
         question.QuestionTypeId = Question.QuestionTypeId;
@@ -104,5 +135,10 @@ public class EditModel : PageModel
         QuestionTypeOptions = new SelectList(questionTypes.OrderBy(qt => qt.Name), "Id", "Name");
         SectionOptions = new SelectList(sections.OrderBy(s => s.Name), "Id", "Name");
         ChoiceTypeIds = await _choiceService.GetChoiceTypeIdsAsync();
+
+        if (!IsAdmin)
+        {
+            CurrentUserSectionName = sections.FirstOrDefault(s => s.Id == Question.SectionId)?.Name;
+        }
     }
 }
