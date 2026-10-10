@@ -131,11 +131,11 @@ public static class IdentitySeeder
         await SeedArtAndDesignAdobeProductQuestionsAsync(dbContext);
         await SeedCustomerSupportEssayQuestionsAsync(dbContext);
         await SeedManagingEssayQuestionsAsync(dbContext);
+        await SeedWebDevelopmentEssayQuestionsAsync(dbContext);
     }
 
     private static readonly string[] PersonalityQuestions =
     {
-        "Done is better than perfect?",
         "What is your greatest strength?"
     };
 
@@ -553,6 +553,17 @@ public static class IdentitySeeder
     private static async Task SeedManagingEssayQuestionsAsync(ApplicationDbContext dbContext)
     {
         await SeedEssayQuestionsAsync(dbContext, Departments.Managing, ManagingEssayQuestions, score: 10);
+    }
+
+    private static readonly string[] WebDevelopmentEssayQuestions =
+    {
+        "Done is better than perfect?",
+        "How do you tell your editor what features to prioritize and work on?"
+    };
+
+    private static async Task SeedWebDevelopmentEssayQuestionsAsync(ApplicationDbContext dbContext)
+    {
+        await SeedEssayQuestionsAsync(dbContext, Departments.WebDevelopment, WebDevelopmentEssayQuestions, score: 1);
     }
 
     private static async Task SeedEssayQuestionsAsync(
