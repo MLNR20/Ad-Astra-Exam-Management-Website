@@ -1,6 +1,8 @@
+using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -8,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AAExamManagementSystem.Pages.RoleAssignments;
 
+[Authorize(Roles = AppRoles.Admin)]
 public class DetailsModel : PageModel
 {
     private readonly UserManager<ApplicationUser> _userManager;

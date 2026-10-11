@@ -1,12 +1,15 @@
+using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace AAExamManagementSystem.Pages.Users;
 
+[Authorize(Roles = AppRoles.Admin)]
 public class DeleteModel : PageModel
 {
     private readonly UserManager<ApplicationUser> _userManager;

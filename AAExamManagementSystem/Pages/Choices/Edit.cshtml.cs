@@ -1,11 +1,14 @@
+using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace AAExamManagementSystem.Pages.Choices;
 
+[Authorize(Roles = AppRoles.Admin)]
 public class EditModel : PageModel
 {
     private readonly IGenericRepository<Choice> _repository;

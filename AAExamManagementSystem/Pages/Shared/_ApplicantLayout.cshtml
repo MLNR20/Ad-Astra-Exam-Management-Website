@@ -1,0 +1,66 @@
+@using AAExamManagementSystem.Models.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var currentUser = User.Identity != null && User.Identity.IsAuthenticated
+        ? await UserManager.GetUserAsync(User)
+        : null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Ad Astra Exams</title>
+    <link rel="icon" type="image/png" href="~/images/adastra-mark.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AAExamManagementSystem.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom mb-0">
+        <div class="container-fluid">
+            <a asp-area="" asp-page="/ApplicantPortal" class="navbar-brand d-flex align-items-center gap-2 fw-semibold text-dark">
+                <img src="~/images/adastra-mark.png" alt="" style="height: 28px;" />
+                Applicant Portal
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                @if (currentUser != null)
+                {
+                    <span class="text-muted d-none d-sm-inline">Welcome, <span class="fw-semibold text-dark">@currentUser.FirstName @currentUser.LastName</span></span>
+                }
+                <a asp-area="" asp-page="/ApplicantPortal" class="btn btn-light btn-sm" title="Dashboard">
+                    <i class="bi bi-grid-1x2" aria-hidden="true"></i> Dashboard
+                </a>
+                <a asp-area="" asp-page="/Attempts/MyAttempts" class="btn btn-light btn-sm" title="My Attempts">
+                    <i class="bi bi-clipboard-check" aria-hidden="true"></i> My Attempts
+                </a>
+                <form method="post" asp-area="" asp-page="/Logout" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-box-arrow-left" aria-hidden="true"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <main role="main" class="flex-grow-1">
+        <div class="container-fluid p-4">
+            @RenderBody()
+        </div>
+    </main>
+
+    @await Html.PartialAsync("_AdAstraFooter")
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

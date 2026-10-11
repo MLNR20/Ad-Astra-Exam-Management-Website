@@ -9,30 +9,19 @@
         </a>
     </div>
     <div class="sidebar-inner d-flex flex-column flex-grow-1 p-3">
-        @if (User.IsInRole(Roles.Applicant))
-        {
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item">
-                    <a asp-area="" asp-page="/ApplicantPortal" class="nav-link text-dark sidebar-link" title="Applicant Portal"><i class="bi bi-mortarboard" aria-hidden="true"></i> <span class="sidebar-label">Applicant Portal</span></a>
-                </li>
-                <li class="nav-item">
-                    <a asp-area="" asp-page="/Attempts/Take" class="nav-link text-dark sidebar-link" title="Take Exam"><i class="bi bi-pencil-square" aria-hidden="true"></i> <span class="sidebar-label">Take Exam</span></a>
-                </li>
-            </ul>
-        }
-        else
-        {
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a asp-area="" asp-page="/Dashboard" class="nav-link text-dark sidebar-link" title="Dashboard"><i class="bi bi-grid-1x2" aria-hidden="true"></i> <span class="sidebar-label">Dashboard</span></a>
-                </li>
-                <li class="nav-item">
-                    <a asp-area="" asp-page="/Analytics/Index" class="nav-link text-dark sidebar-link" title="Analytics"><i class="bi bi-bar-chart-line" aria-hidden="true"></i> <span class="sidebar-label">Analytics</span></a>
-                </li>
-            </ul>
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+                <a asp-area="" asp-page="/Dashboard" class="nav-link text-dark sidebar-link" title="Dashboard"><i class="bi bi-grid-1x2" aria-hidden="true"></i> <span class="sidebar-label">Dashboard</span></a>
+            </li>
+            <li class="nav-item">
+                <a asp-area="" asp-page="/Analytics/Index" class="nav-link text-dark sidebar-link" title="Analytics"><i class="bi bi-bar-chart-line" aria-hidden="true"></i> <span class="sidebar-label">Analytics</span></a>
+            </li>
+        </ul>
 
-            <div class="sidebar-heading sidebar-label text-uppercase text-muted small fw-semibold mt-3 mb-1 px-2">Academics</div>
-            <ul class="nav nav-pills flex-column">
+        <div class="sidebar-heading sidebar-label text-uppercase text-muted small fw-semibold mt-3 mb-1 px-2">Academics</div>
+        <ul class="nav nav-pills flex-column">
+            @if (User.IsInRole(Roles.Admin))
+            {
                 <li class="nav-item">
                     <a asp-area="" asp-page="/Departments/Index" class="nav-link text-dark sidebar-link" title="Departments"><i class="bi bi-building" aria-hidden="true"></i> <span class="sidebar-label">Departments</span></a>
                 </li>
@@ -42,17 +31,23 @@
                 <li class="nav-item">
                     <a asp-area="" asp-page="/Courses/Index" class="nav-link text-dark sidebar-link" title="Courses"><i class="bi bi-journal-bookmark" aria-hidden="true"></i> <span class="sidebar-label">Courses</span></a>
                 </li>
-                <li class="nav-item">
-                    <a asp-area="" asp-page="/Questions/Index" class="nav-link text-dark sidebar-link" title="Questions &amp; Choices"><i class="bi bi-question-circle" aria-hidden="true"></i> <span class="sidebar-label">Questions &amp; Choices</span></a>
-                </li>
-                <li class="nav-item">
-                    <a asp-area="" asp-page="/Attempts/Index" class="nav-link text-dark sidebar-link" title="Exam Attempts"><i class="bi bi-clipboard-check" aria-hidden="true"></i> <span class="sidebar-label">Exam Attempts</span></a>
-                </li>
+            }
+            <li class="nav-item">
+                <a asp-area="" asp-page="/Questions/Index" class="nav-link text-dark sidebar-link" title="Questions &amp; Choices"><i class="bi bi-question-circle" aria-hidden="true"></i> <span class="sidebar-label">Questions &amp; Choices</span></a>
+            </li>
+            <li class="nav-item">
+                <a asp-area="" asp-page="/Attempts/Index" class="nav-link text-dark sidebar-link" title="Exam Attempts"><i class="bi bi-clipboard-check" aria-hidden="true"></i> <span class="sidebar-label">Exam Attempts</span></a>
+            </li>
+            @if (User.IsInRole(Roles.Admin))
+            {
                 <li class="nav-item">
                     <a asp-area="" asp-page="/Announcements/Index" class="nav-link text-dark sidebar-link" title="Announcements"><i class="bi bi-megaphone" aria-hidden="true"></i> <span class="sidebar-label">Announcements</span></a>
                 </li>
-            </ul>
+            }
+        </ul>
 
+        @if (User.IsInRole(Roles.Admin))
+        {
             <div class="sidebar-heading sidebar-label text-uppercase text-muted small fw-semibold mt-3 mb-1 px-2">Administration</div>
             <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item">
@@ -64,12 +59,9 @@
                 <li class="nav-item">
                     <a asp-area="" asp-page="/RoleAssignments/Index" class="nav-link text-dark sidebar-link" title="Role Assignments"><i class="bi bi-person-check" aria-hidden="true"></i> <span class="sidebar-label">Role Assignments</span></a>
                 </li>
-                @if (User.IsInRole(Roles.Admin))
-                {
-                    <li class="nav-item">
-                        <a asp-area="" asp-page="/AuditLogs/Index" class="nav-link text-dark sidebar-link" title="Audit Logs"><i class="bi bi-clipboard-data" aria-hidden="true"></i> <span class="sidebar-label">Audit Logs</span></a>
-                    </li>
-                }
+                <li class="nav-item">
+                    <a asp-area="" asp-page="/AuditLogs/Index" class="nav-link text-dark sidebar-link" title="Audit Logs"><i class="bi bi-clipboard-data" aria-hidden="true"></i> <span class="sidebar-label">Audit Logs</span></a>
+                </li>
             </ul>
         }
 

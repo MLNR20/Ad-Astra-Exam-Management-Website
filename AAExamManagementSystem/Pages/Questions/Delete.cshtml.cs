@@ -1,18 +1,23 @@
+using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
 using AAExamManagementSystem.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace AAExamManagementSystem.Pages.Questions;
 
+[Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Instructor},{AppRoles.Staffer},{AppRoles.Editor}")]
 public class DeleteModel : PageModel
 {
     private readonly IGenericRepository<Question> _repository;
     private readonly IGenericRepository<QuestionType> _questionTypeRepository;
     private readonly IGenericRepository<Section> _sectionRepository;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly QuestionChoiceService _choiceService;
     private readonly IMapper _mapper;
 
@@ -20,12 +25,14 @@ public class DeleteModel : PageModel
         IGenericRepository<Question> repository,
         IGenericRepository<QuestionType> questionTypeRepository,
         IGenericRepository<Section> sectionRepository,
+        UserManager<ApplicationUser> userManager,
         QuestionChoiceService choiceService,
         IMapper mapper)
     {
         _repository = repository;
         _questionTypeRepository = questionTypeRepository;
         _sectionRepository = sectionRepository;
+        _userManager = userManager;
         _choiceService = choiceService;
         _mapper = mapper;
     }
@@ -38,6 +45,15 @@ public class DeleteModel : PageModel
         if (question is null)
         {
             return NotFound();
+        }
+
+        if (!User.IsInRole(AppRoles.Admin))
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser?.SectionId is null || currentUser.SectionId != question.SectionId)
+            {
+                return Forbid();
+            }
         }
 
         Question = _mapper.Map<QuestionDto>(question);
@@ -54,6 +70,15 @@ public class DeleteModel : PageModel
         if (question is null)
         {
             return NotFound();
+        }
+
+        if (!User.IsInRole(AppRoles.Admin))
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser?.SectionId is null || currentUser.SectionId != question.SectionId)
+            {
+                return Forbid();
+            }
         }
 
         await _choiceService.RemoveChoicesAsync(question.Id);

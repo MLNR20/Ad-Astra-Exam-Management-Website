@@ -4,12 +4,14 @@ using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
 using AAExamManagementSystem.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace AAExamManagementSystem.Pages.Questions;
 
+[Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Instructor},{AppRoles.Staffer},{AppRoles.Editor}")]
 public class DetailsModel : PageModel
 {
     private readonly IGenericRepository<Question> _repository;

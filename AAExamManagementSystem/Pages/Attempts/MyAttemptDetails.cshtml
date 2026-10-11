@@ -1,0 +1,96 @@
+@page "{id:int}"
+@model AAExamManagementSystem.Pages.Attempts.MyAttemptDetailsModel
+@{
+    ViewData["Title"] = "My Attempt";
+    Layout = "_ApplicantLayout";
+}
+
+@if (Model.Attempt is null)
+{
+    <p>Attempt not found.</p>
+}
+else
+{
+    var attempt = Model.Attempt;
+    <h1 class="h4 fw-bold mb-4"><i class="bi bi-clipboard-check" aria-hidden="true"></i> My Attempt</h1>
+
+    <div class="card border rounded-2 p-3 mb-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Section</dt>
+                <dd class="col-sm-9">@(attempt.Section ?? "-")</dd>
+
+                <dt class="col-sm-3">Date Taken</dt>
+                <dd class="col-sm-9">@(attempt.DateTaken ?? "-")</dd>
+
+                <dt class="col-sm-3">Score</dt>
+                <dd class="col-sm-9">
+                    @if (attempt.IsApproved)
+                    {
+                        @:@attempt.TotalScore / @attempt.MaxScore
+                    }
+                    else
+                    {
+                        @:Not yet available
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">
+                    @if (attempt.IsApproved)
+                    {
+                        <span class="badge bg-success">Approved</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Pending Approval</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="table-responsive mb-4">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Question</th>
+                    <th>Your Answer</th>
+                    @if (attempt.IsApproved)
+                    {
+                        <th>Correct?</th>
+                        <th>Points</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < attempt.Answers.Count; i++)
+                {
+                    var answer = attempt.Answers[i];
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@answer.QuestionTitle</td>
+                        <td>@(string.IsNullOrEmpty(answer.AnswerText) ? "(no answer)" : answer.AnswerText)</td>
+                        @if (attempt.IsApproved)
+                        {
+                            <td>
+                                @if (answer.IsCorrect == "Yes")
+                                {
+                                    <span class="badge bg-success">Yes</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">No</span>
+                                }
+                            </td>
+                            <td>@answer.Point / @answer.MaxScore</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <a asp-page="/Attempts/MyAttempts" class="btn btn-outline-secondary">Back to My Attempts</a>
+}

@@ -7,7 +7,20 @@
 <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
     <div>
         <h1 class="h3 fw-bold mb-1">Analytics</h1>
-        <p class="text-muted mb-0">Applicant, exam and question bank overview.</p>
+        <p class="text-muted mb-0">
+            @if (!Model.IsAdmin && !string.IsNullOrEmpty(Model.CurrentUserSectionName))
+            {
+                @:Applicant, exam and question bank overview for <strong>@Model.CurrentUserSectionName</strong>.
+            }
+            else if (!Model.IsAdmin)
+            {
+                @:Your account isn't assigned to a department yet, so no data is shown. Contact an administrator.
+            }
+            else
+            {
+                @:Applicant, exam and question bank overview.
+            }
+        </p>
     </div>
     <span class="text-muted small">Updated @DateTime.Now.ToString("MMM d, yyyy h:mm tt")</span>
 </div>

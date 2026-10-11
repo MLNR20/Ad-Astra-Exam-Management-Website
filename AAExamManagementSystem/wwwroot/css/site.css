@@ -307,7 +307,7 @@ header .navbar {
 }
 
 .hero-footer-subheader {
-  font-size: 1.325rem;
+  font-size: 1.525rem;
 }
 
 .announcement-slide {
@@ -332,8 +332,17 @@ header .navbar {
 }
 
 .announcement-next-btn {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.7rem;
+  height: 2.7rem;
+}
+
+/* _ExamQuestionHeader partial (Take / Simulate / SimulateAll) */
+.exam-question-header {
+  font-size: calc(1.5rem - 0.2rem);
+}
+
+.exam-question-subheader {
+  font-size: calc(1.25rem - 0.1rem);
 }
 
 .reminder-number {

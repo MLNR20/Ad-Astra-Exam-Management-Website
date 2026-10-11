@@ -43,13 +43,10 @@
         else
         {
             <form method="post" id="examForm">
-                <div class="d-flex flex-wrap justify-content-between align-items-end gap-4 mb-4">
-                    <div>
-                        <h4 class="fw-bold mb-1">@Model.SectionName</h4>
-                        <h5 class="text-muted fw-normal mb-0">Select one answer for each question, then submit.</h5>
-                    </div>
-                    <span class="badge bg-primary rounded-pill">@Model.Questions.Sum(q => q.Score) pt(s) total</span>
-                </div>
+                @await Html.PartialAsync("_ExamQuestionHeader", (
+                    Heading: "Multiple Choice",
+                    Subheading: "Select one answer for each question, then submit.",
+                    BadgeText: (string?)null))
 
                 @for (var qi = 0; qi < Model.Questions.Count; qi++)
                 {

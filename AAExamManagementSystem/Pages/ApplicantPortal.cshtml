@@ -1,10 +1,9 @@
 @page
 @model ApplicantPortalModel
 @{
-    ViewData["Title"] = "Applicant Portal";
+    ViewData["Title"] = "Dashboard";
+    Layout = "_ApplicantLayout";
 }
-
-<h1 class="h4 fw-bold mb-4"><i class="bi bi-mortarboard" aria-hidden="true"></i> Applicant Portal</h1>
 
 @if (Model.Applicant is null)
 {
@@ -14,6 +13,100 @@
 }
 else
 {
+    <div class="row g-4 align-items-stretch mb-4">
+        <div class="col-12">
+            <div class="bg-black text-white rounded-4 p-5 h-100 d-flex flex-column justify-content-center gap-4">
+                <div>
+                    <span class="d-block fs-5 fw-normal text-white-50 mb-1">Welcome back,</span>
+                    <h1 class="display-6 fw-bold mb-0">@Model.Applicant.FirstName @Model.Applicant.LastName</h1>
+                </div>
+                <div>
+                    <p class="text-white-50 mb-0 hero-tagline fs-5">
+                        @if (Model.AttemptCount == 0)
+                        {
+                            @:Your exam hasn't been taken yet. Good luck when you're ready!
+                        }
+                        else if (Model.LatestAttempt is { IsApproved: true })
+                        {
+                            @:Your results are in. Check your score below.
+                        }
+                        else
+                        {
+                            @:Your exam has been submitted and is awaiting review.
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-tile h-100">
+                <div class="card-body">
+                    <div class="stat-label"><i class="bi bi-check-circle" aria-hidden="true"></i> Application Status</div>
+                    <div class="stat-value">@(Model.Applicant.IsActive ? "Active" : "Inactive")</div>
+                    <div class="stat-meta">Submitted @Model.Applicant.DateCreated.ToString("MMM d, yyyy")</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-tile h-100">
+                <div class="card-body">
+                    <div class="stat-label"><i class="bi bi-mortarboard" aria-hidden="true"></i> First Choice</div>
+                    <div class="stat-value fs-4">@(Model.Applicant.FirstChoice ?? "—")</div>
+                    <div class="stat-meta">2nd: @(Model.Applicant.SecondChoice ?? "—")</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-tile h-100">
+                <div class="card-body">
+                    <div class="stat-label"><i class="bi bi-pencil-square" aria-hidden="true"></i> Exam Attempts</div>
+                    <div class="stat-value">@Model.AttemptCount</div>
+                    <div class="stat-meta">@(Model.AttemptCount == 0 ? "Not yet taken" : "One attempt per applicant")</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-tile h-100">
+                <div class="card-body">
+                    <div class="stat-label"><i class="bi bi-graph-up" aria-hidden="true"></i> Score</div>
+                    @if (Model.LatestAttempt is null)
+                    {
+                        <div class="stat-value">—</div>
+                        <div class="stat-meta">No attempt yet</div>
+                    }
+                    else if (!Model.LatestAttempt.IsApproved)
+                    {
+                        <div class="stat-value fs-4">Pending</div>
+                        <div class="stat-meta">Awaiting review</div>
+                    }
+                    else
+                    {
+                        <div class="stat-value">@Model.LatestAttempt.TotalScore / @Model.LatestAttempt.MaxScore</div>
+                        <div class="stat-meta">Approved</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        @if (Model.AttemptCount == 0)
+        {
+            <a asp-page="/Attempts/Take" class="btn btn-primary">
+                <i class="bi bi-pencil-square me-1" aria-hidden="true"></i> Take Assessment
+            </a>
+        }
+        else
+        {
+            <a asp-page="/Attempts/MyAttempts" class="btn btn-outline-primary">
+                <i class="bi bi-clipboard-check me-1" aria-hidden="true"></i> View My Attempts
+            </a>
+        }
+    </div>
+
     <div class="card border rounded-2 p-3 mb-4">
         <div class="card-header bg-white border-bottom-0">
             <h5 class="mb-0">Your Application</h5>
@@ -64,21 +157,7 @@ else
 
                 <dt class="col-sm-4">Submitted On</dt>
                 <dd class="col-sm-8">@Model.Applicant.DateCreated.ToString("MMM d, yyyy")</dd>
-
-                <dt class="col-sm-4">Exam Attempts</dt>
-                <dd class="col-sm-8">@Model.AttemptCount</dd>
             </dl>
         </div>
     </div>
-
-    @if (Model.AttemptCount == 0)
-    {
-        <a asp-page="/Attempts/Take" class="btn btn-primary">
-            <i class="bi bi-pencil-square me-1" aria-hidden="true"></i> Take Assessment
-        </a>
-    }
-    else
-    {
-        <div class="alert alert-info mb-0">You have already submitted your assessment. It is awaiting review.</div>
-    }
 }

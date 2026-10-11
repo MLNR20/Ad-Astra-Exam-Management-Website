@@ -1,7 +1,9 @@
 using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
 using DepartmentNames = AAExamManagementSystem.Models.Entities.Departments;
+using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,10 +16,12 @@ public class IndexModel : PageModel
     private const int ScoreBucketCount = 10;
 
     private readonly ApplicationDbContext _db;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public IndexModel(ApplicationDbContext db)
+    public IndexModel(ApplicationDbContext db, UserManager<ApplicationUser> userManager)
     {
         _db = db;
+        _userManager = userManager;
     }
 
     public int TotalApplicants { get; private set; }
@@ -29,6 +33,9 @@ public class IndexModel : PageModel
     public int TotalQuestions { get; private set; }
     public int TotalStaff { get; private set; }
 
+    public bool IsAdmin { get; private set; }
+    public string? CurrentUserSectionName { get; private set; }
+
     public IList<LabeledCount> ApplicantsPerMonth { get; private set; } = new List<LabeledCount>();
     public IList<ChoiceCount> DepartmentChoices { get; private set; } = new List<ChoiceCount>();
     public IList<LabeledCount> QuestionsPerSection { get; private set; } = new List<LabeledCount>();
@@ -39,8 +46,44 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync()
     {
-        var applicants = _db.Applicants.AsNoTracking();
+        IsAdmin = User.IsInRole(AppRoles.Admin);
+        int? currentUserSectionId = null;
+
+        if (!IsAdmin)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            currentUserSectionId = currentUser?.SectionId;
+            if (currentUserSectionId is not null)
+            {
+                CurrentUserSectionName = await _db.Sections.AsNoTracking()
+                    .Where(s => s.Id == currentUserSectionId)
+                    .Select(s => s.Name)
+                    .FirstOrDefaultAsync();
+            }
+        }
+
+        var scopedToSection = !IsAdmin && CurrentUserSectionName is not null;
+        var noSectionAssigned = !IsAdmin && CurrentUserSectionName is null;
+
+        var applicants = _db.Applicants.AsNoTracking().AsQueryable();
         var attempts = _db.Attempts.AsNoTracking().Where(a => a.IsActive);
+        var questions = _db.Questions.AsNoTracking().Where(q => q.IsActive);
+        var staff = _db.Users.AsNoTracking().Where(u => u.Applicant == null);
+
+        if (noSectionAssigned)
+        {
+            applicants = applicants.Where(a => false);
+            attempts = attempts.Where(a => false);
+            questions = questions.Where(q => false);
+            staff = staff.Where(u => false);
+        }
+        else if (scopedToSection)
+        {
+            applicants = applicants.Where(a => a.FirstChoice == CurrentUserSectionName || a.SecondChoice == CurrentUserSectionName);
+            attempts = attempts.Where(a => a.Section == CurrentUserSectionName);
+            questions = questions.Where(q => q.SectionId == currentUserSectionId);
+            staff = staff.Where(u => u.SectionId == currentUserSectionId);
+        }
 
         TotalApplicants = await applicants.CountAsync();
         ActiveApplicants = await applicants.CountAsync(a => a.IsActive);
@@ -48,14 +91,20 @@ public class IndexModel : PageModel
         TotalAttempts = await attempts.CountAsync();
         AverageScore = await attempts.AverageAsync(a => (double?)a.TotalScore);
         HighestScore = await attempts.MaxAsync(a => (int?)a.TotalScore);
-        TotalQuestions = await _db.Questions.CountAsync(q => q.IsActive);
-        TotalStaff = await _db.Users.CountAsync(u => u.Applicant == null);
+        TotalQuestions = await questions.CountAsync();
+        TotalStaff = await staff.CountAsync();
 
-        await LoadApplicantTrendAsync();
-        await LoadDepartmentChoicesAsync();
-        await LoadQuestionBreakdownAsync();
-        await LoadScoreDistributionAsync();
-        await LoadStaffPerDepartmentAsync();
+        await LoadApplicantTrendAsync(applicants);
+        await LoadDepartmentChoicesAsync(applicants, scopedToSection);
+        await LoadQuestionBreakdownAsync(IsAdmin, currentUserSectionId);
+        await LoadScoreDistributionAsync(attempts);
+
+        // Staff-per-department breaks down by the separate Department entity, not Section — there is no
+        // meaningful "my department" slice for a section-scoped editor, so admins only.
+        if (IsAdmin)
+        {
+            await LoadStaffPerDepartmentAsync();
+        }
 
         TopAttempts = await attempts
             .OrderByDescending(a => a.TotalScore)
@@ -70,12 +119,12 @@ public class IndexModel : PageModel
             .ToListAsync();
     }
 
-    private async Task LoadApplicantTrendAsync()
+    private async Task LoadApplicantTrendAsync(IQueryable<Applicant> applicants)
     {
         var now = DateTime.UtcNow;
         var start = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-(MonthsInTrend - 1));
 
-        var counts = await _db.Applicants.AsNoTracking()
+        var counts = await applicants
             .Where(a => a.DateCreated >= start)
             .GroupBy(a => new { a.DateCreated.Year, a.DateCreated.Month })
             .Select(g => new { g.Key.Year, g.Key.Month, Count = g.Count() })
@@ -89,21 +138,25 @@ public class IndexModel : PageModel
             .ToList();
     }
 
-    private async Task LoadDepartmentChoicesAsync()
+    private async Task LoadDepartmentChoicesAsync(IQueryable<Applicant> applicants, bool scopedToSection)
     {
-        var first = await _db.Applicants.AsNoTracking()
+        var first = await applicants
             .Where(a => a.FirstChoice != null && a.FirstChoice != "")
             .GroupBy(a => a.FirstChoice!)
             .Select(g => new { Name = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.Name, x => x.Count);
 
-        var second = await _db.Applicants.AsNoTracking()
+        var second = await applicants
             .Where(a => a.SecondChoice != null && a.SecondChoice != "")
             .GroupBy(a => a.SecondChoice!)
             .Select(g => new { Name = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.Name, x => x.Count);
 
-        DepartmentChoices = DepartmentNames.All
+        var departmentNames = scopedToSection && CurrentUserSectionName is not null
+            ? new[] { CurrentUserSectionName }
+            : DepartmentNames.All;
+
+        DepartmentChoices = departmentNames
             .Union(first.Keys)
             .Union(second.Keys)
             .Select(name => new ChoiceCount(name, first.GetValueOrDefault(name), second.GetValueOrDefault(name)))
@@ -112,12 +165,17 @@ public class IndexModel : PageModel
             .ToList();
     }
 
-    private async Task LoadQuestionBreakdownAsync()
+    private async Task LoadQuestionBreakdownAsync(bool isAdmin, int? currentUserSectionId)
     {
         // EF can't translate ordering on a constructor-projected record, so sort an anonymous projection in SQL
         // and build LabeledCount in memory.
-        var perSection = await _db.Sections.AsNoTracking()
-            .Where(s => s.IsActive)
+        var sectionsQuery = _db.Sections.AsNoTracking().Where(s => s.IsActive);
+        if (!isAdmin)
+        {
+            sectionsQuery = sectionsQuery.Where(s => s.Id == currentUserSectionId);
+        }
+
+        var perSection = await sectionsQuery
             .Select(s => new { s.Name, Count = s.Questions.Count(q => q.IsActive) })
             .OrderByDescending(x => x.Count)
             .ToListAsync();
@@ -125,16 +183,19 @@ public class IndexModel : PageModel
 
         var perType = await _db.QuestionTypes.AsNoTracking()
             .Where(t => t.IsActive)
-            .Select(t => new { t.Name, Count = t.Questions.Count(q => q.IsActive) })
+            .Select(t => new
+            {
+                t.Name,
+                Count = t.Questions.Count(q => q.IsActive && (isAdmin || q.SectionId == currentUserSectionId))
+            })
             .OrderByDescending(x => x.Count)
             .ToListAsync();
         QuestionsPerType = perType.Select(x => new LabeledCount(x.Name, x.Count)).ToList();
     }
 
-    private async Task LoadScoreDistributionAsync()
+    private async Task LoadScoreDistributionAsync(IQueryable<Attempt> attempts)
     {
-        var scores = await _db.Attempts.AsNoTracking()
-            .Where(a => a.IsActive)
+        var scores = await attempts
             .Select(a => a.TotalScore)
             .ToListAsync();
 

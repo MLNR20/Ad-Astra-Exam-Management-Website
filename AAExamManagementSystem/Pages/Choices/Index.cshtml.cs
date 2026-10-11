@@ -1,13 +1,16 @@
+using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
 using AAExamManagementSystem.Repository;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace AAExamManagementSystem.Pages.Choices;
 
+[Authorize(Roles = AppRoles.Admin)]
 public class IndexModel : PageModel
 {
     private readonly IGenericRepository<Choice> _repository;

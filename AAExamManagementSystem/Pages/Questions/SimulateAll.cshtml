@@ -64,16 +64,10 @@ else
 
     <div class="py-5 px-3">
         <div class="mx-auto exam-sim-wrap">
-            <div class="d-flex flex-wrap justify-content-between align-items-end gap-4 mb-4">
-                <div>
-                    <h4 class="fw-bold mb-1">@Model.StageHeading</h4>
-                    <h5 class="text-muted fw-normal mb-0">Answer every question below, then submit to see your score.</h5>
-                </div>
-                @if (Model.Questions.Count > 0)
-                {
-                    <span class="badge bg-primary rounded-pill">@Model.Questions.Sum(q => q.Score) pt(s) total</span>
-                }
-            </div>
+            @await Html.PartialAsync("_ExamQuestionHeader", (
+                Heading: Model.StageHeading,
+                Subheading: "Answer every question below, then submit to see your score.",
+                BadgeText: Model.Questions.Count > 0 ? $"{Model.Questions.Sum(q => q.Score)} pt(s) total" : null))
 
             @if (Model.Questions.Count == 0)
             {
