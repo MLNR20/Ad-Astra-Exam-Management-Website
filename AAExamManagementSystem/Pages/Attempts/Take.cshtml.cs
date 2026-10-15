@@ -1,3 +1,4 @@
+using System.Text.Json;
 using AppRoles = AAExamManagementSystem.Models.Entities.Roles;
 using AAExamManagementSystem.Models.Dtos;
 using AAExamManagementSystem.Models.Entities;
@@ -37,7 +38,13 @@ public class TakeModel : PageModel
 
     public string? SecondChoice { get; set; }
 
-    public IList<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
+    public IList<IList<QuestionDto>> Pages { get; set; } = new List<IList<QuestionDto>>();
+
+    public int TotalPages { get; set; }
+
+    public int CurrentPage { get; set; } = 1;
+
+    public IList<QuestionDto> CurrentPageQuestions { get; set; } = new List<QuestionDto>();
 
     [TempData]
     public int? SubmittedScore { get; set; }
@@ -45,10 +52,16 @@ public class TakeModel : PageModel
     [TempData]
     public int? SubmittedMaxScore { get; set; }
 
+    [TempData]
+    public string? ExamError { get; set; }
+
     [BindProperty]
     public Dictionary<Guid, Guid> Answers { get; set; } = new();
 
-    public async Task<IActionResult> OnGetAsync()
+    [BindProperty]
+    public Dictionary<Guid, string> AnswerTexts { get; set; } = new();
+
+    public async Task<IActionResult> OnGetAsync(int pageNum = 1)
     {
         var applicant = await GetApplicantAsync();
         if (applicant is null)
@@ -69,16 +82,27 @@ public class TakeModel : PageModel
         if (AlreadyAttempted)
         {
             SectionName = existingAttempt!.Section;
+            ClearProgress(applicant.Id);
+            return Page();
         }
-        else
+
+        await LoadExamPagesAsync(applicant);
+
+        if (TotalPages == 0)
         {
-            await LoadQuestionsAsync(applicant);
+            return Page();
         }
+
+        CurrentPage = Math.Clamp(pageNum, 1, TotalPages);
+        CurrentPageQuestions = Pages[CurrentPage - 1];
+
+        var progress = LoadProgress(applicant.Id);
+        RehydrateCurrentPageAnswers(progress);
 
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync(int pageNum, string direction)
     {
         var applicant = await GetApplicantAsync();
         if (applicant is null)
@@ -96,57 +120,135 @@ public class TakeModel : PageModel
             return Page();
         }
 
-        await LoadQuestionsAsync(applicant);
+        await LoadExamPagesAsync(applicant);
 
-        if (Questions.Count == 0)
+        if (TotalPages == 0)
         {
             return Page();
         }
 
-        var attempt = new Attempt
+        CurrentPage = Math.Clamp(pageNum, 1, TotalPages);
+        CurrentPageQuestions = Pages[CurrentPage - 1];
+
+        var progress = LoadProgress(applicant.Id);
+        foreach (var question in CurrentPageQuestions)
         {
-            ApplicantId = applicant.Id,
-            AcademicYear = applicant.AcademicYear,
-            Section = SectionName,
-            DateTaken = DateTime.UtcNow.ToString("o"),
-        };
-
-        var totalScore = 0;
-        foreach (var question in Questions)
-        {
-            Answers.TryGetValue(question.Id, out var selectedChoiceId);
-            var selectedChoice = question.Choices.FirstOrDefault(c => c.Id == selectedChoiceId);
-
-            var answer = new Answer
+            if (Answers.TryGetValue(question.Id, out var choiceId) && choiceId != Guid.Empty)
             {
-                ApplicantId = applicant.Id,
-                QuestionId = question.Id,
-                AnswerText = selectedChoice?.ChoiceText ?? string.Empty,
-            };
-
-            if (question.IsUpToEvaluation)
-            {
-                answer.Point = 0;
-            }
-            else
-            {
-                var isCorrect = selectedChoice?.IsCorrect ?? false;
-                answer.IsCorrect = isCorrect ? "Yes" : "No";
-                answer.Point = isCorrect ? question.Score : 0;
-                totalScore += answer.Point;
+                progress.Choices[question.Id] = choiceId;
             }
 
-            attempt.Answers.Add(answer);
+            if (AnswerTexts.TryGetValue(question.Id, out var text) && !string.IsNullOrWhiteSpace(text))
+            {
+                progress.Texts[question.Id] = text;
+            }
         }
 
-        attempt.TotalScore = totalScore;
-        _context.Attempts.Add(attempt);
-        await _context.SaveChangesAsync();
+        SaveProgress(applicant.Id, progress);
 
-        SubmittedScore = totalScore;
-        SubmittedMaxScore = Questions.Sum(q => q.Score);
+        if (direction == "prev")
+        {
+            return RedirectToPage(new { pageNum = CurrentPage - 1 });
+        }
 
-        return RedirectToPage();
+        var currentPageComplete = CurrentPageQuestions.All(q =>
+            progress.Choices.ContainsKey(q.Id) || progress.Texts.ContainsKey(q.Id));
+
+        if (direction == "next")
+        {
+            if (!currentPageComplete)
+            {
+                ModelState.AddModelError(string.Empty, "Please answer every question on this page before continuing.");
+                RehydrateCurrentPageAnswers(progress);
+                return Page();
+            }
+
+            return RedirectToPage(new { pageNum = CurrentPage + 1 });
+        }
+
+        if (direction == "submit")
+        {
+            if (CurrentPage != TotalPages)
+            {
+                return RedirectToPage(new { pageNum = CurrentPage });
+            }
+
+            var firstIncompletePage = -1;
+            for (var i = 0; i < Pages.Count; i++)
+            {
+                if (Pages[i].Any(q => !progress.Choices.ContainsKey(q.Id) && !progress.Texts.ContainsKey(q.Id)))
+                {
+                    firstIncompletePage = i + 1;
+                    break;
+                }
+            }
+
+            if (firstIncompletePage != -1)
+            {
+                ExamError = "Please answer every question before submitting.";
+                return RedirectToPage(new { pageNum = firstIncompletePage });
+            }
+
+            var allQuestions = Pages.SelectMany(p => p).ToList();
+
+            var attempt = new Attempt
+            {
+                ApplicantId = applicant.Id,
+                AcademicYear = applicant.AcademicYear,
+                Section = SectionName,
+                DateTaken = DateTime.UtcNow.ToString("o"),
+            };
+
+            var totalScore = 0;
+            foreach (var question in allQuestions)
+            {
+                var answer = new Answer
+                {
+                    ApplicantId = applicant.Id,
+                    QuestionId = question.Id,
+                };
+
+                if (QuestionTypes.RequiresChoices(question.QuestionTypeName))
+                {
+                    progress.Choices.TryGetValue(question.Id, out var selectedChoiceId);
+                    var selectedChoice = question.Choices.FirstOrDefault(c => c.Id == selectedChoiceId);
+                    answer.AnswerText = selectedChoice?.ChoiceText ?? string.Empty;
+
+                    if (question.IsUpToEvaluation)
+                    {
+                        answer.Point = 0;
+                    }
+                    else
+                    {
+                        var isCorrect = selectedChoice?.IsCorrect ?? false;
+                        answer.IsCorrect = isCorrect ? "Yes" : "No";
+                        answer.Point = isCorrect ? question.Score : 0;
+                        totalScore += answer.Point;
+                    }
+                }
+                else
+                {
+                    progress.Texts.TryGetValue(question.Id, out var text);
+                    answer.AnswerText = text ?? string.Empty;
+                    answer.Point = 0;
+                }
+
+                attempt.Answers.Add(answer);
+            }
+
+            attempt.TotalScore = totalScore;
+            _context.Attempts.Add(attempt);
+            await _context.SaveChangesAsync();
+
+            ClearProgress(applicant.Id);
+
+            SubmittedScore = totalScore;
+            SubmittedMaxScore = allQuestions.Sum(q => q.Score);
+
+            return RedirectToPage();
+        }
+
+        return RedirectToPage(new { pageNum = CurrentPage });
     }
 
     private async Task<Applicant?> GetApplicantAsync()
@@ -155,29 +257,65 @@ public class TakeModel : PageModel
         return await _context.Applicants.FirstOrDefaultAsync(a => a.UserId == userId);
     }
 
-    private async Task LoadQuestionsAsync(Applicant applicant)
+    private async Task LoadExamPagesAsync(Applicant applicant)
     {
         SectionName = await ResolveSectionNameAsync(applicant.FirstChoice)
             ?? await ResolveSectionNameAsync(applicant.SecondChoice);
 
+        Pages = new List<IList<QuestionDto>>();
+
         if (SectionName is null)
         {
-            Questions = new List<QuestionDto>();
+            TotalPages = 0;
             return;
         }
 
         var sectionName = SectionName;
-        var questions = await _context.Questions
-            .Include(q => q.Section)
-            .Where(q => q.IsActive && q.Section.Name == sectionName)
-            .OrderBy(q => q.DateCreated)
-            .Take(QuestionCount)
+        var questionTypeNames = await _context.QuestionTypes.AsNoTracking().ToDictionaryAsync(qt => qt.Id, qt => qt.Name);
+
+        var pageSections = await _context.PageSections
+            .Include(ps => ps.Question)
+            .ThenInclude(q => q.Section)
+            .Where(ps => ps.IsActive && ps.Question.IsActive && ps.Question.Section.Name == sectionName)
+            .OrderBy(ps => ps.PageNumber)
+            .ThenBy(ps => ps.Order)
+            .ThenBy(ps => ps.Id)
             .ToListAsync();
 
-        Questions = questions.Select(q => new QuestionDto
+        if (pageSections.Count > 0)
+        {
+            var groupedQuestions = pageSections
+                .GroupBy(ps => ps.PageNumber)
+                .OrderBy(g => g.Key)
+                .Select(g => g.Select(ps => ps.Question).ToList());
+
+            foreach (var group in groupedQuestions)
+            {
+                Pages.Add(await BuildQuestionDtosAsync(group, questionTypeNames));
+            }
+        }
+        else
+        {
+            var questions = await _context.Questions
+                .Include(q => q.Section)
+                .Where(q => q.IsActive && q.Section.Name == sectionName)
+                .OrderBy(q => q.DateCreated)
+                .Take(QuestionCount)
+                .ToListAsync();
+
+            Pages.Add(await BuildQuestionDtosAsync(questions, questionTypeNames));
+        }
+
+        TotalPages = Pages.Count;
+    }
+
+    private async Task<IList<QuestionDto>> BuildQuestionDtosAsync(IList<Question> questions, IReadOnlyDictionary<int, string> questionTypeNames)
+    {
+        var dtos = questions.Select(q => new QuestionDto
         {
             Id = q.Id,
             QuestionTypeId = q.QuestionTypeId,
+            QuestionTypeName = questionTypeNames.GetValueOrDefault(q.QuestionTypeId, string.Empty),
             SectionId = q.SectionId,
             QuestionTitle = q.QuestionTitle,
             Image = q.Image,
@@ -186,10 +324,12 @@ public class TakeModel : PageModel
             IsActive = q.IsActive,
         }).ToList();
 
-        foreach (var question in Questions)
+        foreach (var dto in dtos)
         {
-            question.Choices = await _choiceService.GetChoicesAsync(question.Id);
+            dto.Choices = await _choiceService.GetChoicesAsync(dto.Id);
         }
+
+        return dtos;
     }
 
     private async Task<string?> ResolveSectionNameAsync(string? choice)
@@ -213,5 +353,51 @@ public class TakeModel : PageModel
             .Where(s => s.IsActive && s.Name.ToLower() == trimmedChoice.ToLower())
             .Select(s => s.Name)
             .FirstAsync();
+    }
+
+    private void RehydrateCurrentPageAnswers(ExamProgress progress)
+    {
+        foreach (var question in CurrentPageQuestions)
+        {
+            if (progress.Choices.TryGetValue(question.Id, out var choiceId))
+            {
+                Answers[question.Id] = choiceId;
+            }
+
+            if (progress.Texts.TryGetValue(question.Id, out var text))
+            {
+                AnswerTexts[question.Id] = text;
+            }
+        }
+    }
+
+    private static string SessionKey(int applicantId) => $"examProgress:{applicantId}";
+
+    private ExamProgress LoadProgress(int applicantId)
+    {
+        var json = HttpContext.Session.GetString(SessionKey(applicantId));
+        if (string.IsNullOrEmpty(json))
+        {
+            return new ExamProgress();
+        }
+
+        return JsonSerializer.Deserialize<ExamProgress>(json) ?? new ExamProgress();
+    }
+
+    private void SaveProgress(int applicantId, ExamProgress progress)
+    {
+        HttpContext.Session.SetString(SessionKey(applicantId), JsonSerializer.Serialize(progress));
+    }
+
+    private void ClearProgress(int applicantId)
+    {
+        HttpContext.Session.Remove(SessionKey(applicantId));
+    }
+
+    private sealed class ExamProgress
+    {
+        public Dictionary<Guid, Guid> Choices { get; set; } = new();
+
+        public Dictionary<Guid, string> Texts { get; set; } = new();
     }
 }

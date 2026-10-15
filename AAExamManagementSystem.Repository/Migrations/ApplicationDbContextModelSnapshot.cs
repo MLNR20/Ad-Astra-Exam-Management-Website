@@ -564,6 +564,45 @@ namespace AAExamManagementSystem.Repository.Migrations
                     b.ToTable("Notifications", "AAExam");
                 });
 
+            modelBuilder.Entity("AAExamManagementSystem.Models.Entities.PageSection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PageNumber")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("QuestionTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId")
+                        .IsUnique();
+
+                    b.HasIndex("QuestionTypeId");
+
+                    b.ToTable("PageSections", "AAExam");
+                });
+
             modelBuilder.Entity("AAExamManagementSystem.Models.Entities.Question", b =>
                 {
                     b.Property<Guid>("Id")
@@ -934,6 +973,25 @@ namespace AAExamManagementSystem.Repository.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AAExamManagementSystem.Models.Entities.PageSection", b =>
+                {
+                    b.HasOne("AAExamManagementSystem.Models.Entities.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AAExamManagementSystem.Models.Entities.QuestionType", "QuestionType")
+                        .WithMany()
+                        .HasForeignKey("QuestionTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("QuestionType");
                 });
 
             modelBuilder.Entity("AAExamManagementSystem.Models.Entities.Question", b =>

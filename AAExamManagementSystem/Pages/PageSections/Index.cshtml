@@ -1,0 +1,149 @@
+@page
+@model AAExamManagementSystem.Pages.PageSections.IndexModel
+@{
+    ViewData["Title"] = "Exam Pages";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Exam Pages</h1>
+</div>
+
+@if (Model.IsAdmin)
+{
+    <form method="get" class="row g-2 align-items-end mb-4">
+        <div class="col-auto">
+            <label class="form-label">Department / Section</label>
+            <select name="SectionId" class="form-select" onchange="this.form.submit()">
+                <option value="">-- Select Section --</option>
+                @foreach (var sectionOption in Model.SelectableSections)
+                {
+                    <option value="@sectionOption.Id" selected="@(Model.SectionId == sectionOption.Id)">@sectionOption.Name</option>
+                }
+            </select>
+        </div>
+    </form>
+}
+
+@if (Model.RequiresSectionSelection)
+{
+    <div class="alert alert-info">Select a section above to manage its exam pages.</div>
+}
+else if (Model.NoDepartmentAssigned)
+{
+    <div class="alert alert-warning">You don't have a department assigned, so you can't manage exam pages. Contact an administrator.</div>
+}
+else
+{
+    <p class="text-muted">Bundling questions for <strong>@Model.CurrentSectionName</strong>. Pick a question type and a
+        page number below to bundle all matching questions onto that page; applicants will see that page's questions,
+        in the order shown, when they take the exam.</p>
+
+    <div class="card mb-4">
+        <div class="card-header fw-semibold">Bundle questions onto a page</div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="Bundle" class="row g-2 align-items-end">
+                <input type="hidden" asp-for="SectionId" />
+                <div class="col-auto">
+                    <label class="form-label">Question Type</label>
+                    <select name="questionTypeId" class="form-select" asp-items="Model.QuestionTypeOptions" required>
+                        <option value="">-- Select Question Type --</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">Page Number</label>
+                    <input type="number" name="pageNumber" class="form-control" min="1" value="1" required style="width: 7rem;" />
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Bundle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    @foreach (var pageGroup in Model.Pages)
+    {
+        var items = pageGroup.OrderBy(i => i.Order).ToList();
+        <div class="card mb-4">
+            <div class="card-header fw-semibold">Page @pageGroup.Key</div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Reorder">
+                    <input type="hidden" asp-for="SectionId" />
+                    <input type="hidden" name="pageNumber" value="@pageGroup.Key" />
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 6rem;">Order</th>
+                                <th>Question</th>
+                                <th style="width: 10rem;">Type</th>
+                                <th style="width: 6rem;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in items)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="number" name="order[@item.Id]" value="@item.Order" class="form-control form-control-sm" />
+                                    </td>
+                                    <td>@(item.QuestionTitle.Length > 80 ? item.QuestionTitle.Substring(0, 80) + "…" : item.QuestionTitle)</td>
+                                    <td><span class="badge bg-secondary">@item.QuestionTypeName</span></td>
+                                    <td>
+                                        <button type="submit" form="remove-form-@item.Id" class="btn btn-sm btn-outline-danger">Remove</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-sm btn-secondary">Save Order</button>
+                </form>
+
+                @foreach (var item in items)
+                {
+                    <form method="post" asp-page-handler="Remove" id="remove-form-@item.Id" class="d-none">
+                        <input type="hidden" asp-for="SectionId" />
+                        <input type="hidden" name="id" value="@item.Id" />
+                    </form>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header fw-semibold">Unassigned Questions</div>
+        <div class="card-body">
+            @if (Model.UnassignedQuestions.Count == 0)
+            {
+                <p class="text-muted mb-0">Every active question in this section has been bundled onto a page.</p>
+            }
+            else
+            {
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th style="width: 10rem;">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.UnassignedQuestions)
+                        {
+                            <tr>
+                                <td>@(item.QuestionTitle.Length > 80 ? item.QuestionTitle.Substring(0, 80) + "…" : item.QuestionTitle)</td>
+                                <td><span class="badge bg-secondary">@item.QuestionTypeName</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}

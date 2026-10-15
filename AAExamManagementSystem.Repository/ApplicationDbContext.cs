@@ -27,6 +27,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<WebPage> WebPages => Set<WebPage>();
     public DbSet<Announcement> Announcements => Set<Announcement>();
+    public DbSet<PageSection> PageSections => Set<PageSection>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -133,6 +134,22 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
         builder.Entity<WebPage>()
             .HasIndex(w => w.Url)
+            .IsUnique();
+
+        builder.Entity<PageSection>()
+            .HasOne(ps => ps.Question)
+            .WithMany()
+            .HasForeignKey(ps => ps.QuestionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<PageSection>()
+            .HasOne(ps => ps.QuestionType)
+            .WithMany()
+            .HasForeignKey(ps => ps.QuestionTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<PageSection>()
+            .HasIndex(ps => ps.QuestionId)
             .IsUnique();
 
         builder.Entity<ApplicationUserRole>()

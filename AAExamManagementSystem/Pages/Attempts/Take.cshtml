@@ -1,5 +1,6 @@
 @page
 @model AAExamManagementSystem.Pages.Attempts.TakeModel
+@using AAExamManagementSystem.Models.Entities
 @{
     ViewData["Title"] = "Take Exam";
     Layout = "_ExamLayout";
@@ -31,7 +32,7 @@
             </div>
             <a asp-page="/ApplicantPortal" class="btn btn-outline-secondary">Back to Applicant Portal</a>
         }
-        else if (Model.Questions.Count == 0)
+        else if (Model.TotalPages == 0)
         {
             <p class="fs-5 mb-3">
                 No active exam questions are available right now for your first choice
@@ -42,27 +43,55 @@
         }
         else
         {
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <p class="mb-0">@error.ErrorMessage</p>
+                    }
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.ExamError))
+            {
+                <div class="alert alert-danger">@Model.ExamError</div>
+            }
+
             <form method="post" id="examForm">
+                <input type="hidden" name="pageNum" value="@Model.CurrentPage" />
                 @await Html.PartialAsync("_ExamQuestionHeader", (
                     Heading: "Multiple Choice",
-                    Subheading: "Select one answer for each question, then submit.",
-                    BadgeText: (string?)null))
+                    Subheading: "Select one answer for each question, then continue.",
+                    BadgeText: Model.TotalPages > 1 ? $"Page {Model.CurrentPage} of {Model.TotalPages}" : (string?)null))
 
-                @for (var qi = 0; qi < Model.Questions.Count; qi++)
+                @for (var qi = 0; qi < Model.CurrentPageQuestions.Count; qi++)
                 {
-                    var question = Model.Questions[qi];
+                    var question = Model.CurrentPageQuestions[qi];
+                    var selectedChoiceId = Model.Answers.GetValueOrDefault(question.Id);
+                    var existingText = Model.AnswerTexts.GetValueOrDefault(question.Id, string.Empty);
                     <div class="exam-sim-question mb-4 pb-4 border-bottom">
                         <h5 class="fw-semibold mb-2">@(qi + 1). @question.QuestionTitle</h5>
-                        <div class="exam-sim-choices">
-                            @for (var ci = 0; ci < question.Choices.Count; ci++)
-                            {
-                                var choice = question.Choices[ci];
-                                <div class="form-check exam-sim-choice mb-2">
-                                    <input class="form-check-input" type="radio" name="Answers[@question.Id]" id="q@(qi)_c@(ci)" value="@choice.Id" required />
-                                    <label class="form-check-label" for="q@(qi)_c@(ci)">@choice.ChoiceText</label>
-                                </div>
-                            }
-                        </div>
+                        @if (QuestionTypes.RequiresChoices(question.QuestionTypeName))
+                        {
+                            <div class="exam-sim-choices">
+                                @for (var ci = 0; ci < question.Choices.Count; ci++)
+                                {
+                                    var choice = question.Choices[ci];
+                                    <div class="form-check exam-sim-choice mb-2">
+                                        <input class="form-check-input" type="radio" name="Answers[@question.Id]" id="q@(qi)_c@(ci)" value="@choice.Id" required checked="@(choice.Id == selectedChoiceId)" />
+                                        <label class="form-check-label" for="q@(qi)_c@(ci)">@choice.ChoiceText</label>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else if (question.QuestionTypeName == QuestionTypes.Essay)
+                        {
+                            <textarea class="form-control" name="AnswerTexts[@question.Id]" rows="4" required>@existingText</textarea>
+                        }
+                        else
+                        {
+                            <input type="text" class="form-control" name="AnswerTexts[@question.Id]" value="@existingText" required />
+                        }
                         @if (!string.IsNullOrEmpty(question.Image))
                         {
                             <img src="@question.Image" class="exam-sim-question-image img-fluid rounded mt-3 d-block mx-auto" alt="" />
@@ -70,16 +99,31 @@
                     </div>
                 }
 
-                <div class="d-flex justify-content-end mb-5">
-                    <button type="submit" class="btn btn-primary">Submit Answers</button>
+                <div class="d-flex justify-content-between mb-5">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <button type="submit" name="direction" value="prev" formnovalidate class="btn btn-outline-secondary">Previous</button>
+                    }
+                    else
+                    {
+                        <span></span>
+                    }
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <button type="submit" name="direction" value="next" class="btn btn-primary">Next</button>
+                    }
+                    else
+                    {
+                        <button type="submit" name="direction" value="submit" class="btn btn-primary">Submit Answers</button>
+                    }
                 </div>
 
                 <div class="alert alert-secondary">
                     <h2 class="h6 fw-bold mb-2">Instructions</h2>
                     <ul class="mb-0 ps-3">
-                        <li>Select exactly one answer for each question.</li>
-                        <li>All questions must be answered before you can submit.</li>
-                        <li>Once you submit, your answers are final and cannot be changed.</li>
+                        <li>Answer every question on this page before continuing.</li>
+                        <li>You can go back to a previous page to review your answers.</li>
+                        <li>Once you submit the final page, your answers are final and cannot be changed.</li>
                         <li>This exam can only be taken once.</li>
                     </ul>
                 </div>
