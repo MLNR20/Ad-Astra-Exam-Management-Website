@@ -80,7 +80,7 @@ else
                 {
                     var question = Model.Questions[qi];
                     var isIdentification = question.QuestionTypeName == AAExamManagementSystem.Models.Entities.QuestionTypes.Identification;
-                    <div class="exam-sim-question mb-4 pb-4" data-question-index="@qi" data-question-type="@question.QuestionTypeName">
+                    <div class="exam-sim-question mb-5 pb-4" data-question-index="@qi" data-question-type="@question.QuestionTypeName">
                         <h5 class="fw-semibold mb-2">
                             @(qi + 1). @question.QuestionTitle
                         </h5>
