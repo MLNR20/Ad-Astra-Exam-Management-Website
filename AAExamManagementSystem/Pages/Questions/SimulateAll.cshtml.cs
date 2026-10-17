@@ -65,6 +65,8 @@ public class SimulateAllModel : PageModel
 
     public string StageHeading { get; set; } = "Multiple Choice Questions";
 
+    public string StageSubheading { get; set; } = "Answer every question below, then submit to see your score.";
+
     public IList<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
 
     public bool HasNextPage { get; set; }
@@ -152,27 +154,45 @@ public class SimulateAllModel : PageModel
             : _mapper.Map<IList<QuestionDto>>(
                 activeQuestions.Where(q => q.SectionId == generalKnowledgeSection.Id));
 
-        var stages = new List<(string Title, string Subtitle, string Heading, IList<QuestionDto> Questions)>
+        (string Heading, string Subheading) ResolveStageText(IEnumerable<QuestionDto> stageQuestions, string defaultHeading, string defaultSubheading)
+        {
+            var match = stageQuestions
+                .Select(q => orderLookup.GetValueOrDefault(q.Id))
+                .FirstOrDefault(ps => ps != null && (!string.IsNullOrWhiteSpace(ps.Instruction) || !string.IsNullOrWhiteSpace(ps.SubInstruction)));
+
+            return (
+                string.IsNullOrWhiteSpace(match?.Instruction) ? defaultHeading : match!.Instruction!,
+                string.IsNullOrWhiteSpace(match?.SubInstruction) ? defaultSubheading : match!.SubInstruction!);
+        }
+
+        var mainStageText = ResolveStageText(departmentMainQuestions, "Multiple Choice Questions", "Answer every question below, then submit to see your score.");
+
+        var stages = new List<(string Title, string Subtitle, string Heading, string Subheading, IList<QuestionDto> Questions)>
         {
             (section.Name,
                 $"This section aims to gauge your familiarity in {section.Name} concepts.",
-                "Multiple Choice Questions",
+                mainStageText.Heading,
+                mainStageText.Subheading,
                 departmentMainQuestions)
         };
 
         if (sqlQuestions.Count > 0)
         {
+            var sqlStageText = ResolveStageText(sqlQuestions, "SQL Query Questions", "Answer every question below, then submit to see your score.");
             stages.Add(("SQL Queries",
                 "Write the SQL query that answers each question about the schema shown.",
-                "SQL Query Questions",
+                sqlStageText.Heading,
+                sqlStageText.Subheading,
                 sqlQuestions));
         }
 
         if (generalKnowledgeQuestions.Count > 0)
         {
+            var generalKnowledgeStageText = ResolveStageText(generalKnowledgeQuestions, "Multiple Choice Questions", "Answer every question below, then submit to see your score.");
             stages.Add((AppDepartments.GeneralKnowledge,
                 "Wrap up with a few general knowledge questions about Ad Astra.",
-                "Multiple Choice Questions",
+                generalKnowledgeStageText.Heading,
+                generalKnowledgeStageText.Subheading,
                 generalKnowledgeQuestions));
         }
 
@@ -189,11 +209,13 @@ public class SimulateAllModel : PageModel
             Title: section.Name,
             Subtitle: string.Empty,
             Heading: "Multiple Choice Questions",
+            Subheading: "Answer every question below, then submit to see your score.",
             Questions: (IList<QuestionDto>)new List<QuestionDto>());
 
         StageTitle = currentStage.Title;
         StageSubtitle = currentStage.Subtitle;
         StageHeading = currentStage.Heading;
+        StageSubheading = currentStage.Subheading;
         Questions = currentStage.Questions;
         HasNextPage = PageNumber < stages.Count;
         HasPreviousPage = PageNumber > 1;

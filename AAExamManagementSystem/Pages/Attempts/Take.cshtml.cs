@@ -46,6 +46,12 @@ public class TakeModel : PageModel
 
     public IList<QuestionDto> CurrentPageQuestions { get; set; } = new List<QuestionDto>();
 
+    public string CurrentPageHeading { get; set; } = "Multiple Choice";
+
+    public string CurrentPageSubheading { get; set; } = "Select one answer for each question, then continue.";
+
+    private IList<(string? Instruction, string? SubInstruction)> PageInstructions { get; set; } = new List<(string?, string?)>();
+
     [TempData]
     public int? SubmittedScore { get; set; }
 
@@ -95,6 +101,7 @@ public class TakeModel : PageModel
 
         CurrentPage = Math.Clamp(pageNum, 1, TotalPages);
         CurrentPageQuestions = Pages[CurrentPage - 1];
+        ApplyCurrentPageText();
 
         var progress = LoadProgress(applicant.Id);
         RehydrateCurrentPageAnswers(progress);
@@ -129,6 +136,7 @@ public class TakeModel : PageModel
 
         CurrentPage = Math.Clamp(pageNum, 1, TotalPages);
         CurrentPageQuestions = Pages[CurrentPage - 1];
+        ApplyCurrentPageText();
 
         var progress = LoadProgress(applicant.Id);
         foreach (var question in CurrentPageQuestions)
@@ -282,16 +290,22 @@ public class TakeModel : PageModel
             .ThenBy(ps => ps.Id)
             .ToListAsync();
 
+        PageInstructions = new List<(string?, string?)>();
+
         if (pageSections.Count > 0)
         {
-            var groupedQuestions = pageSections
+            var pageGroups = pageSections
                 .GroupBy(ps => ps.PageNumber)
                 .OrderBy(g => g.Key)
-                .Select(g => g.Select(ps => ps.Question).ToList());
+                .ToList();
 
-            foreach (var group in groupedQuestions)
+            foreach (var group in pageGroups)
             {
-                Pages.Add(await BuildQuestionDtosAsync(group, questionTypeNames));
+                var questions = group.Select(ps => ps.Question).ToList();
+                Pages.Add(await BuildQuestionDtosAsync(questions, questionTypeNames));
+
+                var match = group.FirstOrDefault(ps => !string.IsNullOrWhiteSpace(ps.Instruction) || !string.IsNullOrWhiteSpace(ps.SubInstruction));
+                PageInstructions.Add((match?.Instruction, match?.SubInstruction));
             }
         }
         else
@@ -304,6 +318,7 @@ public class TakeModel : PageModel
                 .ToListAsync();
 
             Pages.Add(await BuildQuestionDtosAsync(questions, questionTypeNames));
+            PageInstructions.Add((null, null));
         }
 
         TotalPages = Pages.Count;
@@ -353,6 +368,14 @@ public class TakeModel : PageModel
             .Where(s => s.IsActive && s.Name.ToLower() == trimmedChoice.ToLower())
             .Select(s => s.Name)
             .FirstAsync();
+    }
+
+    private void ApplyCurrentPageText()
+    {
+        var instruction = PageInstructions.Count >= CurrentPage ? PageInstructions[CurrentPage - 1] : (null, null);
+
+        CurrentPageHeading = string.IsNullOrWhiteSpace(instruction.Item1) ? "Multiple Choice" : instruction.Item1!;
+        CurrentPageSubheading = string.IsNullOrWhiteSpace(instruction.Item2) ? "Select one answer for each question, then continue." : instruction.Item2!;
     }
 
     private void RehydrateCurrentPageAnswers(ExamProgress progress)
