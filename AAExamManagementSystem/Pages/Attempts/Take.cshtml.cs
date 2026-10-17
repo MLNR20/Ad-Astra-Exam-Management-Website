@@ -281,31 +281,36 @@ public class TakeModel : PageModel
         var sectionName = SectionName;
         var questionTypeNames = await _context.QuestionTypes.AsNoTracking().ToDictionaryAsync(qt => qt.Id, qt => qt.Name);
 
-        var pageSections = await _context.PageSections
-            .Include(ps => ps.Question)
-            .ThenInclude(q => q.Section)
-            .Where(ps => ps.IsActive && ps.Question.IsActive && ps.Question.Section.Name == sectionName)
-            .OrderBy(ps => ps.PageNumber)
-            .ThenBy(ps => ps.Order)
-            .ThenBy(ps => ps.Id)
+        var examPages = await _context.ExamPages
+            .Include(p => p.PageSections)
+            .ThenInclude(ps => ps.Questions)
+            .Where(p => p.IsActive && p.Section.Name == sectionName)
+            .OrderBy(p => p.PageNumber)
             .ToListAsync();
 
         PageInstructions = new List<(string?, string?)>();
 
-        if (pageSections.Count > 0)
+        var pagesWithQuestions = examPages
+            .Select(p => (
+                Page: p,
+                Questions: p.PageSections
+                    .Where(ps => ps.IsActive)
+                    .OrderBy(ps => ps.Order)
+                    .ThenBy(ps => ps.Id)
+                    .SelectMany(ps => ps.Questions
+                        .Where(q => q.IsActive)
+                        .OrderBy(q => q.PageOrder)
+                        .ThenBy(q => q.DateCreated))
+                    .ToList()))
+            .Where(p => p.Questions.Count > 0)
+            .ToList();
+
+        if (pagesWithQuestions.Count > 0)
         {
-            var pageGroups = pageSections
-                .GroupBy(ps => ps.PageNumber)
-                .OrderBy(g => g.Key)
-                .ToList();
-
-            foreach (var group in pageGroups)
+            foreach (var (examPage, questions) in pagesWithQuestions)
             {
-                var questions = group.Select(ps => ps.Question).ToList();
                 Pages.Add(await BuildQuestionDtosAsync(questions, questionTypeNames));
-
-                var match = group.FirstOrDefault(ps => !string.IsNullOrWhiteSpace(ps.Instruction) || !string.IsNullOrWhiteSpace(ps.SubInstruction));
-                PageInstructions.Add((match?.Instruction, match?.SubInstruction));
+                PageInstructions.Add((examPage.Instruction, examPage.SubInstruction));
             }
         }
         else

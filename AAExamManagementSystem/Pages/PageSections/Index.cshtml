@@ -72,7 +72,7 @@
 
             @foreach (var pageGroup in Model.Pages)
             {
-                var items = pageGroup.OrderBy(i => i.Order).ToList();
+                var items = pageGroup.ToList();
                 var pageInstruction = items.FirstOrDefault()?.Instruction;
                 var pageSubInstruction = items.FirstOrDefault()?.SubInstruction;
                 <div class="card mb-4">
@@ -99,39 +99,44 @@
                         <form method="post" asp-page-handler="Reorder">
                             <input type="hidden" asp-for="SectionId" />
                             <input type="hidden" name="pageNumber" value="@pageGroup.Key" />
-                            <table class="table table-sm align-middle">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 6rem;">Order</th>
-                                        <th>Question</th>
-                                        <th style="width: 10rem;">Type</th>
-                                        <th style="width: 6rem;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in items)
-                                    {
+                            @foreach (var sectionGroup in items.GroupBy(i => i.PageSectionId))
+                            {
+                                <h6 class="fw-semibold mt-3 mb-2">
+                                    <span class="badge bg-secondary">@sectionGroup.First().QuestionTypeName</span>
+                                    <span class="text-muted small ms-1">Section @sectionGroup.First().SectionOrder</span>
+                                </h6>
+                                <table class="table table-sm align-middle">
+                                    <thead>
                                         <tr>
-                                            <td>
-                                                <input type="number" name="order[@item.Id]" value="@item.Order" class="form-control form-control-sm" />
-                                            </td>
-                                            <td>@(item.QuestionTitle.Length > 80 ? item.QuestionTitle.Substring(0, 80) + "…" : item.QuestionTitle)</td>
-                                            <td><span class="badge bg-secondary">@item.QuestionTypeName</span></td>
-                                            <td>
-                                                <button type="submit" form="remove-form-@item.Id" class="btn btn-sm btn-outline-danger">Remove</button>
-                                            </td>
+                                            <th style="width: 6rem;">Order</th>
+                                            <th>Question</th>
+                                            <th style="width: 6rem;"></th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in sectionGroup)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <input type="number" name="order[@item.QuestionId]" value="@item.Order" class="form-control form-control-sm" />
+                                                </td>
+                                                <td>@(item.QuestionTitle.Length > 80 ? item.QuestionTitle.Substring(0, 80) + "…" : item.QuestionTitle)</td>
+                                                <td>
+                                                    <button type="submit" form="remove-form-@item.QuestionId" class="btn btn-sm btn-outline-danger">Remove</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
                             <button type="submit" class="btn btn-sm btn-secondary">Save Order</button>
                         </form>
 
                         @foreach (var item in items)
                         {
-                            <form method="post" asp-page-handler="Remove" id="remove-form-@item.Id" class="d-none">
+                            <form method="post" asp-page-handler="Remove" id="remove-form-@item.QuestionId" class="d-none">
                                 <input type="hidden" asp-for="SectionId" />
-                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="questionId" value="@item.QuestionId" />
                             </form>
                         }
                     </div>

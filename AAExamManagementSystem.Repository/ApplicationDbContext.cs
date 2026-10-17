@@ -27,6 +27,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<WebPage> WebPages => Set<WebPage>();
     public DbSet<Announcement> Announcements => Set<Announcement>();
+    public DbSet<ExamPage> ExamPages => Set<ExamPage>();
     public DbSet<PageSection> PageSections => Set<PageSection>();
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -136,11 +137,21 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
             .HasIndex(w => w.Url)
             .IsUnique();
 
-        builder.Entity<PageSection>()
-            .HasOne(ps => ps.Question)
+        builder.Entity<ExamPage>()
+            .HasOne(p => p.Section)
             .WithMany()
-            .HasForeignKey(ps => ps.QuestionId)
+            .HasForeignKey(p => p.SectionId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<ExamPage>()
+            .HasIndex(p => new { p.SectionId, p.PageNumber })
+            .IsUnique();
+
+        builder.Entity<PageSection>()
+            .HasOne(ps => ps.ExamPage)
+            .WithMany(p => p.PageSections)
+            .HasForeignKey(ps => ps.ExamPageId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<PageSection>()
             .HasOne(ps => ps.QuestionType)
@@ -148,9 +159,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(ps => ps.QuestionTypeId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Entity<PageSection>()
-            .HasIndex(ps => ps.QuestionId)
-            .IsUnique();
+        builder.Entity<Question>()
+            .HasOne(q => q.PageSection)
+            .WithMany(ps => ps.Questions)
+            .HasForeignKey(q => q.PageSectionId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.Entity<ApplicationUserRole>()
             .HasQueryFilter(ur => ur.IsActive);

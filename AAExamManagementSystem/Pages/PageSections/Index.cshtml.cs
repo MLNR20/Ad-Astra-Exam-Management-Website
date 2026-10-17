@@ -96,42 +96,50 @@ public class IndexModel : PageModel
         var typeNamesById = questionTypes.ToDictionary(qt => qt.Id, qt => qt.Name);
         QuestionTypeOptions = new SelectList(questionTypes, "Id", "Name");
 
-        var sectionQuestions = await _context.Questions
+        var examPages = await _context.ExamPages
             .AsNoTracking()
-            .Where(q => q.IsActive && q.SectionId == section.Id)
+            .Include(p => p.PageSections)
+            .ThenInclude(ps => ps.Questions)
+            .Where(p => p.IsActive && p.SectionId == section.Id)
             .ToListAsync();
 
-        var pageSectionEntities = await _context.PageSections
+        var pageSectionDtos = examPages
+            .SelectMany(p => p.PageSections
+                .Where(ps => ps.IsActive)
+                .SelectMany(ps => ps.Questions
+                    .Where(q => q.IsActive)
+                    .Select(q => new PageSectionDto
+                    {
+                        PageSectionId = ps.Id,
+                        ExamPageId = p.Id,
+                        QuestionId = q.Id,
+                        QuestionTitle = q.QuestionTitle,
+                        QuestionTypeId = ps.QuestionTypeId,
+                        QuestionTypeName = typeNamesById.GetValueOrDefault(ps.QuestionTypeId, "—"),
+                        SectionId = q.SectionId,
+                        Score = q.Score,
+                        IsUpToEvaluation = q.IsUpToEvaluation,
+                        PageNumber = p.PageNumber,
+                        SectionOrder = ps.Order,
+                        Order = q.PageOrder,
+                        Instruction = p.Instruction,
+                        SubInstruction = p.SubInstruction,
+                    })))
+            .OrderBy(d => d.PageNumber)
+            .ThenBy(d => d.SectionOrder)
+            .ThenBy(d => d.PageSectionId)
+            .ThenBy(d => d.Order)
+            .ToList();
+
+        Pages = pageSectionDtos.GroupBy(d => d.PageNumber).OrderBy(g => g.Key).ToList();
+
+        var unassigned = await _context.Questions
             .AsNoTracking()
-            .Include(ps => ps.Question)
-            .Where(ps => ps.IsActive && ps.Question.IsActive && ps.Question.SectionId == section.Id)
-            .OrderBy(ps => ps.PageNumber)
-            .ThenBy(ps => ps.Order)
-            .ThenBy(ps => ps.Id)
-            .ToListAsync();
-
-        var pageSectionDtos = pageSectionEntities.Select(ps => new PageSectionDto
-        {
-            Id = ps.Id,
-            QuestionId = ps.QuestionId,
-            QuestionTitle = ps.Question.QuestionTitle,
-            QuestionTypeId = ps.QuestionTypeId,
-            QuestionTypeName = typeNamesById.GetValueOrDefault(ps.QuestionTypeId, "—"),
-            SectionId = ps.Question.SectionId,
-            Score = ps.Question.Score,
-            IsUpToEvaluation = ps.Question.IsUpToEvaluation,
-            PageNumber = ps.PageNumber,
-            Order = ps.Order,
-            Instruction = ps.Instruction,
-            SubInstruction = ps.SubInstruction,
-        }).ToList();
-
-        Pages = pageSectionDtos.GroupBy(p => p.PageNumber).OrderBy(g => g.Key).ToList();
-
-        var assignedQuestionIds = pageSectionEntities.Select(ps => ps.QuestionId).ToHashSet();
-        UnassignedQuestions = sectionQuestions
-            .Where(q => !assignedQuestionIds.Contains(q.Id))
+            .Where(q => q.IsActive && q.SectionId == section.Id && q.PageSectionId == null)
             .OrderBy(q => q.DateCreated)
+            .ToListAsync();
+
+        UnassignedQuestions = unassigned
             .Select(q => new PageSectionDto
             {
                 QuestionId = q.Id,
@@ -171,60 +179,59 @@ public class IndexModel : PageModel
             return RedirectToPage(new { SectionId = effectiveSectionId });
         }
 
-        var questionIds = matchingQuestions.Select(q => q.Id).ToHashSet();
+        var examPage = await _context.ExamPages
+            .Include(p => p.PageSections)
+            .FirstOrDefaultAsync(p => p.SectionId == effectiveSectionId.Value && p.PageNumber == pageNumber);
 
-        var currentPageRows = await _context.PageSections
-            .Include(ps => ps.Question)
-            .Where(ps => ps.PageNumber == pageNumber && ps.Question.SectionId == effectiveSectionId.Value)
-            .OrderBy(ps => ps.Order)
-            .ThenBy(ps => ps.Id)
-            .ToListAsync();
-
-        var existingForBundle = await _context.PageSections
-            .Where(ps => questionIds.Contains(ps.QuestionId))
-            .ToListAsync();
-        var existingByQuestionId = existingForBundle.ToDictionary(ps => ps.QuestionId);
-
-        var orderedTargetRows = new List<PageSection>(currentPageRows);
-
-        foreach (var question in matchingQuestions)
+        if (examPage is null)
         {
-            if (existingByQuestionId.TryGetValue(question.Id, out var row))
-            {
-                if (row.PageNumber != pageNumber)
-                {
-                    row.PageNumber = pageNumber;
-                    row.QuestionTypeId = questionTypeId;
-                    row.DateUpdated = DateTime.UtcNow;
-                    orderedTargetRows.Add(row);
-                }
-                // Already sitting on this page - keep its existing slot in currentPageRows.
-            }
-            else
-            {
-                var newRow = new PageSection
-                {
-                    QuestionId = question.Id,
-                    QuestionTypeId = questionTypeId,
-                    PageNumber = pageNumber,
-                };
-                _context.PageSections.Add(newRow);
-                orderedTargetRows.Add(newRow);
-            }
+            examPage = new ExamPage { SectionId = effectiveSectionId.Value, PageNumber = pageNumber };
+            _context.ExamPages.Add(examPage);
         }
 
-        for (var i = 0; i < orderedTargetRows.Count; i++)
+        var pageSection = examPage.PageSections.FirstOrDefault(ps => ps.QuestionTypeId == questionTypeId);
+        if (pageSection is null)
         {
-            orderedTargetRows[i].Order = i + 1;
+            pageSection = new PageSection
+            {
+                QuestionTypeId = questionTypeId,
+                Order = (examPage.PageSections.Max(ps => (int?)ps.Order) ?? 0) + 1,
+            };
+            examPage.PageSections.Add(pageSection);
         }
+
+        var orderedQuestions = pageSection.Id == 0
+            ? new List<Question>()
+            : await _context.Questions
+                .Where(q => q.PageSectionId == pageSection.Id)
+                .OrderBy(q => q.PageOrder)
+                .ThenBy(q => q.DateCreated)
+                .ToListAsync();
+
+        var alreadyInSection = orderedQuestions.Select(q => q.Id).ToHashSet();
+        foreach (var question in matchingQuestions.Where(q => !alreadyInSection.Contains(q.Id)))
+        {
+            question.PageSection = pageSection;
+            orderedQuestions.Add(question);
+        }
+
+        for (var i = 0; i < orderedQuestions.Count; i++)
+        {
+            orderedQuestions[i].PageOrder = i + 1;
+        }
+
+        var now = DateTime.UtcNow;
+        examPage.DateUpdated = now;
+        pageSection.DateUpdated = now;
 
         await _context.SaveChangesAsync();
+        await RemoveEmptyPagesAndSectionsAsync(effectiveSectionId.Value);
 
         TempData["SuccessMessage"] = $"Bundled {matchingQuestions.Count} question(s) onto page {pageNumber}.";
         return RedirectToPage(new { SectionId = effectiveSectionId });
     }
 
-    public async Task<IActionResult> OnPostReorderAsync(int pageNumber, Dictionary<int, int> order)
+    public async Task<IActionResult> OnPostReorderAsync(int pageNumber, Dictionary<Guid, int> order)
     {
         var effectiveSectionId = await ResolveEffectiveSectionIdAsync();
         if (effectiveSectionId is null)
@@ -233,17 +240,21 @@ public class IndexModel : PageModel
         }
 
         var ids = order.Keys.ToList();
-        var rows = await _context.PageSections
-            .Include(ps => ps.Question)
-            .Where(ps => ids.Contains(ps.Id) && ps.PageNumber == pageNumber && ps.Question.SectionId == effectiveSectionId.Value)
+        var questions = await _context.Questions
+            .Include(q => q.PageSection)
+            .Where(q => ids.Contains(q.Id)
+                && q.SectionId == effectiveSectionId.Value
+                && q.PageSection != null
+                && q.PageSection.ExamPage.PageNumber == pageNumber)
             .ToListAsync();
 
-        foreach (var row in rows)
+        var now = DateTime.UtcNow;
+        foreach (var question in questions)
         {
-            if (order.TryGetValue(row.Id, out var newOrder))
+            if (order.TryGetValue(question.Id, out var newOrder))
             {
-                row.Order = newOrder;
-                row.DateUpdated = DateTime.UtcNow;
+                question.PageOrder = newOrder;
+                question.PageSection!.DateUpdated = now;
             }
         }
 
@@ -261,17 +272,18 @@ public class IndexModel : PageModel
             return Forbid();
         }
 
-        var rows = await _context.PageSections
-            .Include(ps => ps.Question)
-            .Where(ps => ps.PageNumber == pageNumber && ps.Question.SectionId == effectiveSectionId.Value)
-            .ToListAsync();
+        var examPage = await _context.ExamPages
+            .FirstOrDefaultAsync(p => p.SectionId == effectiveSectionId.Value && p.PageNumber == pageNumber);
 
-        foreach (var row in rows)
+        if (examPage is null)
         {
-            row.Instruction = instruction;
-            row.SubInstruction = subInstruction;
-            row.DateUpdated = DateTime.UtcNow;
+            TempData["ErrorMessage"] = $"Page {pageNumber} no longer exists.";
+            return RedirectToPage(new { SectionId = effectiveSectionId });
         }
+
+        examPage.Instruction = instruction;
+        examPage.SubInstruction = subInstruction;
+        examPage.DateUpdated = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
@@ -279,7 +291,7 @@ public class IndexModel : PageModel
         return RedirectToPage(new { SectionId = effectiveSectionId });
     }
 
-    public async Task<IActionResult> OnPostRemoveAsync(int id)
+    public async Task<IActionResult> OnPostRemoveAsync(Guid questionId)
     {
         var effectiveSectionId = await ResolveEffectiveSectionIdAsync();
         if (effectiveSectionId is null)
@@ -287,25 +299,40 @@ public class IndexModel : PageModel
             return Forbid();
         }
 
-        var row = await _context.PageSections
-            .Include(ps => ps.Question)
-            .FirstOrDefaultAsync(ps => ps.Id == id);
+        var question = await _context.Questions.FirstOrDefaultAsync(q => q.Id == questionId);
 
-        if (row is null)
+        if (question is null || question.PageSectionId is null)
         {
             return NotFound();
         }
 
-        if (row.Question.SectionId != effectiveSectionId.Value)
+        if (question.SectionId != effectiveSectionId.Value)
         {
             return Forbid();
         }
 
-        _context.PageSections.Remove(row);
+        question.PageSectionId = null;
+        question.PageOrder = 0;
         await _context.SaveChangesAsync();
+        await RemoveEmptyPagesAndSectionsAsync(effectiveSectionId.Value);
 
         TempData["SuccessMessage"] = "Question removed from its page.";
         return RedirectToPage(new { SectionId = effectiveSectionId });
+    }
+
+    private async Task RemoveEmptyPagesAndSectionsAsync(int sectionId)
+    {
+        var emptySections = await _context.PageSections
+            .Where(ps => ps.ExamPage.SectionId == sectionId && !ps.Questions.Any())
+            .ToListAsync();
+        _context.PageSections.RemoveRange(emptySections);
+        await _context.SaveChangesAsync();
+
+        var emptyPages = await _context.ExamPages
+            .Where(p => p.SectionId == sectionId && !p.PageSections.Any())
+            .ToListAsync();
+        _context.ExamPages.RemoveRange(emptyPages);
+        await _context.SaveChangesAsync();
     }
 
     private async Task<int?> ResolveEffectiveSectionIdAsync()

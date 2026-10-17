@@ -20,15 +20,19 @@ public class SimulateAllModel : PageModel
     private readonly IGenericRepository<Question> _repository;
     private readonly IGenericRepository<QuestionType> _questionTypeRepository;
     private readonly IGenericRepository<Section> _sectionRepository;
+    private readonly IGenericRepository<ExamPage> _examPageRepository;
     private readonly IGenericRepository<PageSection> _pageSectionRepository;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly QuestionChoiceService _choiceService;
     private readonly IMapper _mapper;
 
+    private sealed record QuestionPlacement(int PageNumber, int SectionOrder, int Order, string? Instruction, string? SubInstruction);
+
     public SimulateAllModel(
         IGenericRepository<Question> repository,
         IGenericRepository<QuestionType> questionTypeRepository,
         IGenericRepository<Section> sectionRepository,
+        IGenericRepository<ExamPage> examPageRepository,
         IGenericRepository<PageSection> pageSectionRepository,
         UserManager<ApplicationUser> userManager,
         QuestionChoiceService choiceService,
@@ -37,6 +41,7 @@ public class SimulateAllModel : PageModel
         _repository = repository;
         _questionTypeRepository = questionTypeRepository;
         _sectionRepository = sectionRepository;
+        _examPageRepository = examPageRepository;
         _pageSectionRepository = pageSectionRepository;
         _userManager = userManager;
         _choiceService = choiceService;
@@ -126,18 +131,32 @@ public class SimulateAllModel : PageModel
             .Select(qt => qt.Id)
             .ToHashSet();
 
-        var orderLookup = (await _pageSectionRepository.GetAllAsync())
-            .Where(ps => ps.IsActive)
-            .GroupBy(ps => ps.QuestionId)
-            .ToDictionary(
-                g => g.Key,
-                g => g.OrderBy(ps => ps.PageNumber).ThenBy(ps => ps.Order).ThenBy(ps => ps.Id).First());
+        var examPagesById = (await _examPageRepository.GetAllAsync())
+            .Where(p => p.IsActive)
+            .ToDictionary(p => p.Id);
+        var pageSectionsById = (await _pageSectionRepository.GetAllAsync())
+            .Where(ps => ps.IsActive && examPagesById.ContainsKey(ps.ExamPageId))
+            .ToDictionary(ps => ps.Id);
 
-        var activeQuestions = (await _repository.GetAllAsync())
+        var allQuestions = (await _repository.GetAllAsync()).ToList();
+
+        var orderLookup = allQuestions
+            .Where(q => q.PageSectionId.HasValue && pageSectionsById.ContainsKey(q.PageSectionId.Value))
+            .ToDictionary(
+                q => q.Id,
+                q =>
+                {
+                    var pageSection = pageSectionsById[q.PageSectionId!.Value];
+                    var examPage = examPagesById[pageSection.ExamPageId];
+                    return new QuestionPlacement(examPage.PageNumber, pageSection.Order, q.PageOrder, examPage.Instruction, examPage.SubInstruction);
+                });
+
+        var activeQuestions = allQuestions
             .Where(q => q.IsActive && simulatedTypeIds.Contains(q.QuestionTypeId))
             .OrderBy(q => orderLookup.ContainsKey(q.Id) ? 0 : 1)
-            .ThenBy(q => orderLookup.TryGetValue(q.Id, out var ps) ? ps.PageNumber : 0)
-            .ThenBy(q => orderLookup.TryGetValue(q.Id, out var ps) ? ps.Order : 0)
+            .ThenBy(q => orderLookup.TryGetValue(q.Id, out var placement) ? placement.PageNumber : 0)
+            .ThenBy(q => orderLookup.TryGetValue(q.Id, out var placement) ? placement.SectionOrder : 0)
+            .ThenBy(q => orderLookup.TryGetValue(q.Id, out var placement) ? placement.Order : 0)
             .ThenBy(q => q.DateCreated)
             .ToList();
 

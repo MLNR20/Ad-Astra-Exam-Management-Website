@@ -7,6 +7,9 @@ public class Question
     public QuestionType QuestionType { get; set; } = null!;
     public int SectionId { get; set; }
     public Section Section { get; set; } = null!;
+    public int? PageSectionId { get; set; }
+    public PageSection? PageSection { get; set; }
+    public int PageOrder { get; set; }
     public string QuestionTitle { get; set; } = string.Empty;
     public string? Image { get; set; }
     public int Score { get; set; } = 1;
