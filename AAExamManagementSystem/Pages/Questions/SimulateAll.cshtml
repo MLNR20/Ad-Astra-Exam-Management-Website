@@ -62,7 +62,7 @@ else
         </div>
     </div>
 
-    <div class="py-5 px-3">
+    <div class="py-4 px-0">
         <div class="mx-auto exam-sim-wrap">
             @await Html.PartialAsync("_ExamQuestionHeader", (
                 Heading: Model.StageHeading,
@@ -80,7 +80,7 @@ else
                 {
                     var question = Model.Questions[qi];
                     var isIdentification = question.QuestionTypeName == AAExamManagementSystem.Models.Entities.QuestionTypes.Identification;
-                    <div class="exam-sim-question mb-5 pb-4" data-question-index="@qi" data-question-type="@question.QuestionTypeName">
+                    <div class="exam-sim-question mb-5" data-question-index="@qi" data-question-type="@question.QuestionTypeName">
                         <h5 class="fw-semibold mb-1">
                             @(qi + 1). @question.QuestionTitle
                         </h5>
@@ -137,7 +137,11 @@ else
                 <div class="alert alert-secondary">
                     <h2 class="h6 fw-bold mb-2">Instructions</h2>
                     <ul class="mb-0 ps-3">
-                        <li>Select exactly one answer for each question.</li>
+                        <li>Select exactly one answer for each multiple choice question.</li>
+                        @if (Model.Questions.Any(q => q.QuestionTypeName == AAExamManagementSystem.Models.Entities.QuestionTypes.Identification))
+                        {
+                            <li>For identification questions, type your exact answer in the text box provided.</li>
+                        }
                         <li>All questions must be answered before you can submit.</li>
                         <li>Once you submit, your answers are final and cannot be changed.</li>
                         <li>Each question's point value is shown next to its title.</li>
@@ -151,12 +155,12 @@ else
 @section Styles {
     <style>
         .exam-sim-wrap {
-            max-width: 720px;
+            max-width: 960px;
             width: 100%;
         }
 
         .exam-sim-question-image {
-            width: 33%;
+            width: 26%;
         }
 
         .exam-sim-question-image-wide {
@@ -199,11 +203,11 @@ else
         }
 
         .exam-sim-hero-title {
-            font-size: 4.75rem;
+            font-size: 3.5rem;
         }
 
         .exam-sim-hero-subtitle {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             opacity: 0.9;
         }
     </style>

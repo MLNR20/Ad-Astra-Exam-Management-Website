@@ -122,6 +122,8 @@ public class IndexModel : PageModel
             IsUpToEvaluation = ps.Question.IsUpToEvaluation,
             PageNumber = ps.PageNumber,
             Order = ps.Order,
+            Instruction = ps.Instruction,
+            SubInstruction = ps.SubInstruction,
         }).ToList();
 
         Pages = pageSectionDtos.GroupBy(p => p.PageNumber).OrderBy(g => g.Key).ToList();
@@ -248,6 +250,32 @@ public class IndexModel : PageModel
         await _context.SaveChangesAsync();
 
         TempData["SuccessMessage"] = "Order updated.";
+        return RedirectToPage(new { SectionId = effectiveSectionId });
+    }
+
+    public async Task<IActionResult> OnPostSetInstructionAsync(int pageNumber, string? instruction, string? subInstruction)
+    {
+        var effectiveSectionId = await ResolveEffectiveSectionIdAsync();
+        if (effectiveSectionId is null)
+        {
+            return Forbid();
+        }
+
+        var rows = await _context.PageSections
+            .Include(ps => ps.Question)
+            .Where(ps => ps.PageNumber == pageNumber && ps.Question.SectionId == effectiveSectionId.Value)
+            .ToListAsync();
+
+        foreach (var row in rows)
+        {
+            row.Instruction = instruction;
+            row.SubInstruction = subInstruction;
+            row.DateUpdated = DateTime.UtcNow;
+        }
+
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = $"Instructions updated for page {pageNumber}.";
         return RedirectToPage(new { SectionId = effectiveSectionId });
     }
 

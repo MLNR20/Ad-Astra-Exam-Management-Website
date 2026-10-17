@@ -12,4 +12,6 @@ public class PageSectionDto
     public bool IsUpToEvaluation { get; set; }
     public int PageNumber { get; set; }
     public int Order { get; set; }
+    public string? Instruction { get; set; }
+    public string? SubInstruction { get; set; }
 }
