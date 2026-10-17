@@ -67,7 +67,7 @@ else
             @await Html.PartialAsync("_ExamQuestionHeader", (
                 Heading: Model.StageHeading,
                 Subheading: "Answer every question below, then submit to see your score.",
-                BadgeText: Model.Questions.Count > 0 ? $"{Model.Questions.Sum(q => q.Score)} pt(s) total" : null))
+                BadgeText: (string?)null))
 
             @if (Model.Questions.Count == 0)
             {
@@ -98,7 +98,7 @@ else
                                 @for (var ci = 0; ci < question.Choices.Count; ci++)
                                 {
                                     var choice = question.Choices[ci];
-                                    <div class="form-check exam-sim-choice mb-2">
+                                    <div class="form-check exam-sim-choice mb-3">
                                         <input class="form-check-input" type="radio" name="q@(qi)" id="q@(qi)_c@(ci)" data-correct="@choice.IsCorrect.ToString().ToLowerInvariant()" />
                                         <label class="form-check-label" for="q@(qi)_c@(ci)">@choice.ChoiceText</label>
                                     </div>
@@ -170,11 +170,10 @@ else
         }
 
         .exam-sim-input {
-            max-width: 320px;
+            width: 100%;
         }
 
         .exam-sim-input-sql {
-            max-width: 100%;
             width: 100%;
         }
 

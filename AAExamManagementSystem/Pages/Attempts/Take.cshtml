@@ -77,7 +77,7 @@
                                 @for (var ci = 0; ci < question.Choices.Count; ci++)
                                 {
                                     var choice = question.Choices[ci];
-                                    <div class="form-check exam-sim-choice mb-2">
+                                    <div class="form-check exam-sim-choice mb-3">
                                         <input class="form-check-input" type="radio" name="Answers[@question.Id]" id="q@(qi)_c@(ci)" value="@choice.Id" required checked="@(choice.Id == selectedChoiceId)" />
                                         <label class="form-check-label" for="q@(qi)_c@(ci)">@choice.ChoiceText</label>
                                     </div>

@@ -20,6 +20,7 @@ public class SimulateAllModel : PageModel
     private readonly IGenericRepository<Question> _repository;
     private readonly IGenericRepository<QuestionType> _questionTypeRepository;
     private readonly IGenericRepository<Section> _sectionRepository;
+    private readonly IGenericRepository<PageSection> _pageSectionRepository;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly QuestionChoiceService _choiceService;
     private readonly IMapper _mapper;
@@ -28,6 +29,7 @@ public class SimulateAllModel : PageModel
         IGenericRepository<Question> repository,
         IGenericRepository<QuestionType> questionTypeRepository,
         IGenericRepository<Section> sectionRepository,
+        IGenericRepository<PageSection> pageSectionRepository,
         UserManager<ApplicationUser> userManager,
         QuestionChoiceService choiceService,
         IMapper mapper)
@@ -35,6 +37,7 @@ public class SimulateAllModel : PageModel
         _repository = repository;
         _questionTypeRepository = questionTypeRepository;
         _sectionRepository = sectionRepository;
+        _pageSectionRepository = pageSectionRepository;
         _userManager = userManager;
         _choiceService = choiceService;
         _mapper = mapper;
@@ -121,9 +124,19 @@ public class SimulateAllModel : PageModel
             .Select(qt => qt.Id)
             .ToHashSet();
 
+        var orderLookup = (await _pageSectionRepository.GetAllAsync())
+            .Where(ps => ps.IsActive)
+            .GroupBy(ps => ps.QuestionId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderBy(ps => ps.PageNumber).ThenBy(ps => ps.Order).ThenBy(ps => ps.Id).First());
+
         var activeQuestions = (await _repository.GetAllAsync())
             .Where(q => q.IsActive && simulatedTypeIds.Contains(q.QuestionTypeId))
-            .OrderBy(q => q.DateCreated)
+            .OrderBy(q => orderLookup.ContainsKey(q.Id) ? 0 : 1)
+            .ThenBy(q => orderLookup.TryGetValue(q.Id, out var ps) ? ps.PageNumber : 0)
+            .ThenBy(q => orderLookup.TryGetValue(q.Id, out var ps) ? ps.Order : 0)
+            .ThenBy(q => q.DateCreated)
             .ToList();
 
         var departmentQuestions = _mapper.Map<IList<QuestionDto>>(

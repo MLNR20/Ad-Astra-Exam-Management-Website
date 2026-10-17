@@ -6,7 +6,7 @@
     <title>@ViewData["Title"] - Exam Management System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -15,11 +15,9 @@
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
     <nav class="navbar navbar-light bg-white border-bottom mb-0">
-        <div class="container-fluid">
-            <div class="d-flex align-items-center gap-4">
-                <span class="navbar-brand mb-0 fw-semibold"><i class="bi bi-eye" aria-hidden="true"></i>Exam Simulation Preview</span>
-                @await RenderSectionAsync("NavbarTimer", required: false)
-            </div>
+        <div class="container-fluid d-flex align-items-center justify-content-between">
+            <span class="navbar-brand mb-0 fw-semibold"><i class="bi bi-eye" aria-hidden="true"></i>Exam Simulation Preview</span>
+            @await RenderSectionAsync("NavbarTimer", required: false)
         </div>
     </nav>
     <main role="main" class="flex-grow-1">
