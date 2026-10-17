@@ -19,7 +19,7 @@ public static class IdentitySeeder
         ("Departments", "/Departments/Index", "bi-building", "Academics", 3),
         ("Sections", "/Sections/Index", "bi-diagram-3", "Academics", 4),
         ("Courses", "/Courses/Index", "bi-journal-bookmark", "Academics", 5),
-        ("Questions & Choices", "/Questions/Index", "bi-question-circle", "Academics", 6),
+        ("Questions", "/Questions/Index", "bi-question-circle", "Academics", 6),
         ("Users", "/Users/Index", "bi-people", "Administration", 7),
         ("Roles", "/Roles/Index", "bi-person-badge", "Administration", 8),
         ("Role Assignments", "/RoleAssignments/Index", "bi-person-check", "Administration", 9),

@@ -65,31 +65,16 @@ else
                             <td>@answer.QuestionTitle</td>
                             <td>@(string.IsNullOrEmpty(answer.AnswerText) ? "(no answer)" : answer.AnswerText)</td>
                             <td>
-                                @if (answer.IsUpToEvaluation)
-                                {
-                                    <select name="Corrections[@answer.Id]" class="form-select form-select-sm">
-                                        <option value="Yes" selected="@(answer.IsCorrect == "Yes")">Yes</option>
-                                        <option value="No" selected="@(answer.IsCorrect != "Yes")">No</option>
-                                    </select>
-                                }
-                                else if (answer.IsCorrect == "Yes")
-                                {
-                                    <span class="badge bg-success">Yes</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger">No</span>
-                                }
+                                <select name="Corrections[@answer.Id]" class="form-select form-select-sm">
+                                    <option value="Yes" selected="@(answer.IsCorrect == "Yes")">Yes</option>
+                                    <option value="No" selected="@(answer.IsCorrect != "Yes")">No</option>
+                                </select>
                             </td>
                             <td>
-                                @if (answer.IsUpToEvaluation)
-                                {
-                                    <input type="number" name="Points[@answer.Id]" value="@answer.Point" min="0" max="@answer.MaxScore" class="form-control form-control-sm" />
-                                }
-                                else
-                                {
-                                    @answer.Point <text> / </text> @answer.MaxScore
-                                }
+                                <input type="number" name="Points[@answer.Id]" value="@answer.Point" min="0" max="@answer.MaxScore" step="1"
+                                       class="form-control form-control-sm"
+                                       oninput="if(this.value !== '' && Number(this.value) > Number(this.max)) this.value = this.max; if(this.value !== '' && Number(this.value) < 0) this.value = 0;" />
+                                <div class="form-text">Max @answer.MaxScore</div>
                             </td>
                             <td>@(answer.CheckedBy ?? "-")</td>
                         </tr>

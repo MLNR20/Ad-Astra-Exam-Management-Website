@@ -87,7 +87,7 @@ public class ReviewModel : PageModel
         var currentUser = await _userManager.GetUserAsync(User);
         var evaluatorName = currentUser != null ? $"{currentUser.FirstName} {currentUser.LastName}" : User.Identity?.Name;
 
-        foreach (var answer in attempt.Answers.Where(ans => ans.Question.IsUpToEvaluation))
+        foreach (var answer in attempt.Answers)
         {
             if (Points.TryGetValue(answer.Id, out var point))
             {

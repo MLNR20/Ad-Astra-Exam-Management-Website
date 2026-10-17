@@ -95,7 +95,7 @@ header .navbar {
 }
 
 .navbar-search-wrapper {
-  max-width: 360px;
+  width: 75%;
 }
 
 .navbar-search-wrapper #navbarSearchResults {
@@ -299,15 +299,7 @@ header .navbar {
 
 .hero-footer-bar {
   background-color: #000;
-  min-height: 18vh;
-}
-
-.hero-footer-title {
-  font-size: 1.60rem;
-}
-
-.hero-footer-subheader {
-  font-size: 1.525rem;
+  min-height: 9rem;
 }
 
 .announcement-slide {

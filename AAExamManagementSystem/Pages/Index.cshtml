@@ -51,8 +51,8 @@
                     {
                         var announcement = Model.Announcements[i];
                         <div class="announcement-slide d-flex flex-column @(i == 0 ? "" : "d-none")" data-index="@i">
-                            <span class="hero-footer-title fw-bold">@announcement.Title</span>
-                            <span class="hero-footer-subheader text-white-50">@announcement.Subheader</span>
+                            <span class="hero-footer-title fw-bold fs-4">@announcement.Title</span>
+                            <span class="hero-footer-subheader text-white-50 fs-4">@announcement.Subheader</span>
                         </div>
                     }
                 </div>
@@ -68,8 +68,8 @@
         {
             <section class="hero-footer-bar d-flex align-items-center text-start text-white px-5">
                 <div class="flex-grow-1 d-flex flex-column announcement-slide">
-                    <span class="hero-footer-title fw-bold">We're all good for now!</span>
-                    <span class="hero-footer-subheader text-white-50">Kindly view our Ad Astra's social media page for recruitment announcements and updates.</span>
+                    <span class="hero-footer-title fw-bold fs-4">We're all good for now!</span>
+                    <span class="hero-footer-subheader text-white-50 fs-4">Kindly view our Ad Astra's social media page for recruitment announcements and updates.</span>
                 </div>
             </section>
         }
