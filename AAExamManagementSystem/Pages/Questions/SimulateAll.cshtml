@@ -80,11 +80,11 @@ else
                 {
                     var question = Model.Questions[qi];
                     var isIdentification = question.QuestionTypeName == AAExamManagementSystem.Models.Entities.QuestionTypes.Identification;
-                    <div class="exam-sim-question mb-4 pb-4 border-bottom" data-question-index="@qi" data-question-type="@question.QuestionTypeName">
+                    <div class="exam-sim-question mb-4 pb-4" data-question-index="@qi" data-question-type="@question.QuestionTypeName">
                         <h5 class="fw-semibold mb-2">
                             @(qi + 1). @question.QuestionTitle
                         </h5>
-                        <div class="exam-sim-choices">
+                        <div class="exam-sim-choices mt-2">
                             @if (isIdentification)
                             {
                                 var correctAnswer = question.Choices.FirstOrDefault(c => c.IsCorrect)?.ChoiceText ?? string.Empty;

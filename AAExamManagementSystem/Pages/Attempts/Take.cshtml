@@ -69,11 +69,11 @@
                     var question = Model.CurrentPageQuestions[qi];
                     var selectedChoiceId = Model.Answers.GetValueOrDefault(question.Id);
                     var existingText = Model.AnswerTexts.GetValueOrDefault(question.Id, string.Empty);
-                    <div class="exam-sim-question mb-4 pb-4 border-bottom">
+                    <div class="exam-sim-question mb-4 pb-4">
                         <h5 class="fw-semibold mb-2">@(qi + 1). @question.QuestionTitle</h5>
                         @if (QuestionTypes.RequiresChoices(question.QuestionTypeName))
                         {
-                            <div class="exam-sim-choices">
+                            <div class="exam-sim-choices mt-2">
                                 @for (var ci = 0; ci < question.Choices.Count; ci++)
                                 {
                                     var choice = question.Choices[ci];
